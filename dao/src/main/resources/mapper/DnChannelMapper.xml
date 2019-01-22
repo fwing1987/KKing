@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kking.dao.mapper.DnChannelMapper">
+    <resultMap id="SimpleResult" type="DnChannel">
+        <id property="id" column="id"/>
+            <result property="id" column="id"/>
+            <result property="rootId" column="root_id"/>
+            <result property="pid" column="pid"/>
+            <result property="name" column="name"/>
+            <result property="level" column="level"/>
+            <result property="channelCode" column="channel_code"/>
+            <result property="username" column="username"/>
+            <result property="token" column="token"/>
+            <result property="phone" column="phone"/>
+            <result property="password" column="password"/>
+            <result property="province" column="province"/>
+            <result property="city" column="city"/>
+            <result property="country" column="country"/>
+            <result property="platformFee" column="platform_fee"/>
+            <result property="accType" column="acc_type"/>
+            <result property="ctype" column="ctype"/>
+            <result property="isRedPack" column="is_red_pack"/>
+            <result property="payMethod" column="pay_method"/>
+            <result property="state" column="state"/>
+            <result property="updTime" column="upd_time"/>
+            <result property="createTime" column="create_time"/>
+            <result property="taobao" column="taobao"/>
+            <result property="wxId" column="wx_id"/>
+            <result property="pids" column="pids"/>
+            <result property="isTop" column="is_top"/>
+        </resultMap>
+    <sql id="SelectOneSql" >
+        select <trim suffixOverrides=","> id,  root_id,  pid,  name,  level,  channel_code,  username,  token,  phone,  password,  province,  city,  country,  platform_fee,  acc_type,  ctype,  is_red_pack,  pay_method,  state,  upd_time,  create_time,  taobao,  wx_id,  pids,  is_top, </trim>
+        from dn_channel
+    </sql>
+    <select id="selectOne" resultType="DnChannel" parameterType="Integer">
+        <include refid="SelectOneSql"/>
+        where id=#{id}
+    </select>
+    <insert id="insert" parameterType="DnChannel" keyProperty="id" useGeneratedKeys="true">
+        insert into dn_channel(
+        <trim suffixOverrides=",">
+                                    <if test="rootId != null ">`root_id`,</if>
+                                <if test="pid != null ">`pid`,</if>
+                                <if test="name != null  and name != ''">`name`,</if>
+                                <if test="level != null ">`level`,</if>
+                                <if test="channelCode != null  and channelCode != ''">`channel_code`,</if>
+                                <if test="username != null  and username != ''">`username`,</if>
+                                <if test="token != null  and token != ''">`token`,</if>
+                                <if test="phone != null  and phone != ''">`phone`,</if>
+                                <if test="password != null  and password != ''">`password`,</if>
+                                <if test="province != null  and province != ''">`province`,</if>
+                                <if test="city != null  and city != ''">`city`,</if>
+                                <if test="country != null  and country != ''">`country`,</if>
+                                <if test="platformFee != null ">`platform_fee`,</if>
+                                <if test="accType != null ">`acc_type`,</if>
+                                <if test="ctype != null ">`ctype`,</if>
+                                <if test="isRedPack != null  and isRedPack != ''">`is_red_pack`,</if>
+                                <if test="payMethod != null  and payMethod != ''">`pay_method`,</if>
+                                <if test="state != null ">`state`,</if>
+                                <if test="updTime != null ">`upd_time`,</if>
+                                <if test="createTime != null ">`create_time`,</if>
+                                <if test="taobao != null  and taobao != ''">`taobao`,</if>
+                                <if test="wxId != null ">`wx_id`,</if>
+                                <if test="pids != null  and pids != ''">`pids`,</if>
+                                <if test="isTop != null ">`is_top`,</if>
+                    </trim>
+        )values(
+        <trim suffixOverrides=",">
+                                    <if test="rootId != null ">#{rootId},</if>
+                                <if test="pid != null ">#{pid},</if>
+                                <if test="name != null  and name != ''">#{name},</if>
+                                <if test="level != null ">#{level},</if>
+                                <if test="channelCode != null  and channelCode != ''">#{channelCode},</if>
+                                <if test="username != null  and username != ''">#{username},</if>
+                                <if test="token != null  and token != ''">#{token},</if>
+                                <if test="phone != null  and phone != ''">#{phone},</if>
+                                <if test="password != null  and password != ''">#{password},</if>
+                                <if test="province != null  and province != ''">#{province},</if>
+                                <if test="city != null  and city != ''">#{city},</if>
+                                <if test="country != null  and country != ''">#{country},</if>
+                                <if test="platformFee != null ">#{platformFee},</if>
+                                <if test="accType != null ">#{accType},</if>
+                                <if test="ctype != null ">#{ctype},</if>
+                                <if test="isRedPack != null  and isRedPack != ''">#{isRedPack},</if>
+                                <if test="payMethod != null  and payMethod != ''">#{payMethod},</if>
+                                <if test="state != null ">#{state},</if>
+                                <if test="updTime != null ">#{updTime},</if>
+                                <if test="createTime != null ">#{createTime},</if>
+                                <if test="taobao != null  and taobao != ''">#{taobao},</if>
+                                <if test="wxId != null ">#{wxId},</if>
+                                <if test="pids != null  and pids != ''">#{pids},</if>
+                                <if test="isTop != null ">#{isTop},</if>
+                    </trim>
+        )
+    </insert>
+    <select id="selectOneByProperty" resultType="DnChannel">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from dn_channel where id=#{id}
+    </delete>
+    <update id="update" parameterType="DnChannel">
+        update dn_channel set
+        <trim suffixOverrides=",">
+                                            <if test="rootId != null ">`root_id`=#{rootId},</if>
+                                    <if test="pid != null ">`pid`=#{pid},</if>
+                                    <if test="name != null  and name != ''">`name`=#{name},</if>
+                                    <if test="level != null ">`level`=#{level},</if>
+                                    <if test="channelCode != null  and channelCode != ''">`channel_code`=#{channelCode},</if>
+                                    <if test="username != null  and username != ''">`username`=#{username},</if>
+                                    <if test="token != null  and token != ''">`token`=#{token},</if>
+                                    <if test="phone != null  and phone != ''">`phone`=#{phone},</if>
+                                    <if test="password != null  and password != ''">`password`=#{password},</if>
+                                    <if test="province != null  and province != ''">`province`=#{province},</if>
+                                    <if test="city != null  and city != ''">`city`=#{city},</if>
+                                    <if test="country != null  and country != ''">`country`=#{country},</if>
+                                    <if test="platformFee != null ">`platform_fee`=#{platformFee},</if>
+                                    <if test="accType != null ">`acc_type`=#{accType},</if>
+                                    <if test="ctype != null ">`ctype`=#{ctype},</if>
+                                    <if test="isRedPack != null  and isRedPack != ''">`is_red_pack`=#{isRedPack},</if>
+                                    <if test="payMethod != null  and payMethod != ''">`pay_method`=#{payMethod},</if>
+                                    <if test="state != null ">`state`=#{state},</if>
+                                    <if test="updTime != null ">`upd_time`=#{updTime},</if>
+                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
+                                    <if test="taobao != null  and taobao != ''">`taobao`=#{taobao},</if>
+                                    <if test="wxId != null ">`wx_id`=#{wxId},</if>
+                                    <if test="pids != null  and pids != ''">`pids`=#{pids},</if>
+                                    <if test="isTop != null ">`is_top`=#{isTop},</if>
+                        </trim>
+        where id=#{id}
+    </update>
+
+</mapper>

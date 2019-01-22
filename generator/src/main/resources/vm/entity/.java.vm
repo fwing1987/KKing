@@ -1,0 +1,36 @@
+package ${packageName}.${moduleName};
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class ${table.xCamelName} implements Serializable {
+#foreach($column in $columns)
+    private ${column.javaType} ${column.camelName};
+#end
+
+    private static final long serialVersionUID = 1L;
+
+#foreach($column in $columns)
+    public ${column.javaType} get${column.xCamelName}() {
+        return ${column.camelName};
+    }
+
+    public void set${column.xCamelName}(${column.javaType} ${column.camelName}) {
+        this.${column.camelName} = ${column.camelName};
+    }
+
+#end
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(" [");
+        sb.append("Hash = ").append(hashCode());
+#foreach($column in $columns)
+        sb.append(", ${column.camelName}=").append(${column.camelName});
+#end
+        sb.append("]");
+        return sb.toString();
+    }
+}

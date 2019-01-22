@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${packageName}.${moduleName}.${table.xCamelName}Mapper">
+    <resultMap id="SimpleResult" type="${table.xCamelName}">
+        <id property="${primaryKey.camelName}" column="${primaryKey.columnName}"/>
+    #foreach($column in $columns)
+        <result property="${column.camelName}" column="${column.columnName}"/>
+    #end
+    </resultMap>
+    <sql id="SelectOneSql" >
+        select <trim suffixOverrides=",">#foreach($column in $columns) ${column.columnName}, #end</trim>
+        from dn_channel
+    </sql>
+    <select id="selectOne" resultType="${table.xCamelName}" parameterType="Integer">
+        <include refid="SelectOneSql"/>
+        where ${primaryKey.columnName}=#{${primaryKey.camelName}}
+    </select>
+    <insert id="insert" parameterType="${table.xCamelName}" keyProperty="${primaryKey.columnName}" useGeneratedKeys="true">
+        insert into ${tableName}(
+        <trim suffixOverrides=",">
+    #foreach($column in $columns)
+        #if (${column.columnName}!=${primaryKey.columnName})
+            <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">`${column.columnName}`,</if>
+        #end
+    #end
+        </trim>
+        )values(
+        <trim suffixOverrides=",">
+    #foreach($column in $columns)
+        #if (${column.columnName}!=${primaryKey.columnName})
+            <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">#{${column.camelName}},</if>
+        #end
+    #end
+        </trim>
+        )
+    </insert>
+    <select id="selectOneByProperty" resultType="${table.xCamelName}">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from ${tableName} where ${primaryKey.columnName}=#{${primaryKey.camelName}}
+    </delete>
+    <update id="update" parameterType="DnChannel">
+        update dn_channel set
+        <trim suffixOverrides=",">
+        #foreach($column in $columns)
+        #if (${column.columnName}!=${primaryKey.columnName})
+            <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">`${column.columnName}`=#{${column.camelName}},</if>
+        #end
+        #end
+        </trim>
+        where id=#{id}
+    </update>
+
+</mapper>

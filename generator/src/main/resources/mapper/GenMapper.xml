@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kking.generator.mapper.GenMapper">
+    <resultMap id="TableInfoResult" type="TableInfo">
+        <id column="table_name" property="tableName"/>
+        <result column="table_comment" property="tableComment"/>
+    </resultMap>
+    <resultMap id="ColumnInfoResult" type="ColumnInfo">
+        <id column="column_name" property="columnName"/>
+        <result column="data_type" property="dataType"/>
+    </resultMap>
+    <select id="selectTable" resultMap="TableInfoResult" parameterType="String">
+        select table_name,table_comment
+        from information_schema.tables
+        where table_name = #{table_name} and table_schema=(select database())
+    </select>
+    <select id="selectColumns" resultMap="ColumnInfoResult" parameterType="String">
+        select column_name,data_type
+        from information_schema.columns
+        where table_name = #{table_name} and table_schema=(select database())
+        order by ordinal_position
+    </select>
+
+
+</mapper>

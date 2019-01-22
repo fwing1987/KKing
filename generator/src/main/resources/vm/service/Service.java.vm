@@ -1,0 +1,11 @@
+package ${packageName}.${moduleName};
+
+import ${packageName}.entity.${table.xCamelName};
+
+public interface ${table.xCamelName}Service {
+    public ${table.xCamelName} selectOne(Integer id);
+    public int insert(${table.xCamelName} ${table.camelName});
+    public ${table.xCamelName} selectOneByProperty(String key,Object value);
+    public int deleteById(Integer id);
+    public int update(${table.xCamelName} ${table.camelName});
+}

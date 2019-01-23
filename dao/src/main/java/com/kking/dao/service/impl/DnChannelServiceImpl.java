@@ -1,10 +1,13 @@
 package com.kking.dao.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kking.dao.entity.DnChannel;
 import com.kking.dao.mapper.DnChannelMapper;
 import com.kking.dao.service.DnChannelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class DnChannelServiceImpl implements DnChannelService {
@@ -35,4 +38,8 @@ public class DnChannelServiceImpl implements DnChannelService {
         return dnChannelMapper.update(dnChannel);
     }
 
+    @Override
+    public List<DnChannel> select(JSONObject json) {
+        return dnChannelMapper.select(json);
+    }
 }

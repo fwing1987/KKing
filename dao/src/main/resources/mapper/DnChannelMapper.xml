@@ -133,5 +133,11 @@
                         </trim>
         where id=#{id}
     </update>
+    <select id="select" resultType="DnChannel" parameterType="DnChannel">
+        <include refid="SelectOneSql"/>
+        <where>
+            <if test="createTime!=null">create_time &gt;= #{createTime}</if>
+        </where>
+    </select>
 
 </mapper>

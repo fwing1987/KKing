@@ -1,28 +1,39 @@
-package ${packageName}.${moduleName}.impl;
+package ${packageName}.${moduleName};
 
 import ${packageName}.entity.${table.xCamelName};
 import ${packageName}.mapper.${table.xCamelName}Mapper;
 import ${packageName}.service.${table.xCamelName}Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class ${table.xCamelName}ServiceImpl implements ${table.xCamelName}Service {
     @Autowired
     ${table.xCamelName}Mapper ${table.camelName}Mapper;
     @Override
-    public ${table.xCamelName} selectOne(Integer id) {
-        return ${table.camelName}Mapper.selectOne(id);
+    public ${table.xCamelName} selectById(Integer id) {
+        return ${table.camelName}Mapper.selectById(id);
     }
 
     @Override
-    public int insert(${table.xCamelName} ${table.camelName}) {
-        return ${table.camelName}Mapper.insert(${table.camelName});
+    public List<${table.xCamelName}> selectList(${table.xCamelName} ${table.camelName}) {
+        return ${table.camelName}Mapper.selectList(${table.camelName});
     }
 
     @Override
     public ${table.xCamelName} selectOneByProperty(String key, Object value) {
         return ${table.camelName}Mapper.selectOneByProperty(key,value);
+    }
+
+    @Override
+    public List<${table.xCamelName}> selectListByProperty(String key, Object value) {
+        return ${table.camelName}Mapper.selectListByProperty(key,value);
+    }
+
+    @Override
+    public int insert(${table.xCamelName} ${table.camelName}) {
+        return ${table.camelName}Mapper.insert(${table.camelName});
     }
 
     @Override

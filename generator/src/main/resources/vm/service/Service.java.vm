@@ -1,11 +1,14 @@
 package ${packageName}.${moduleName};
 
 import ${packageName}.entity.${table.xCamelName};
+import java.util.List;
 
 public interface ${table.xCamelName}Service {
-    public ${table.xCamelName} selectOne(Integer id);
+    public ${table.xCamelName} selectById(Integer id);
+    public List<${table.xCamelName}> selectList(${table.xCamelName} ${table.camelName});
+    public ${table.xCamelName} selectOneByProperty(String key, Object value);
+    public List<${table.xCamelName}> selectListByProperty(String key, Object value);
     public int insert(${table.xCamelName} ${table.camelName});
-    public ${table.xCamelName} selectOneByProperty(String key,Object value);
     public int deleteById(Integer id);
     public int update(${table.xCamelName} ${table.camelName});
 }

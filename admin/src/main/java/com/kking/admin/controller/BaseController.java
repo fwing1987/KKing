@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.kking.admin.config.Config;
 import com.kking.admin.dto.JsonResult;
+import com.kking.dao.entity.BaseEntity;
 
 import java.util.List;
 
@@ -14,12 +15,18 @@ public class BaseController {
     protected JsonResult toJson(int rows){
         if(rows > 0){
             return JsonResult.success();
-        }else{
+        }else {
             return JsonResult.error();
         }
     }
 
-    protected JsonResult toJsonWithPage(List<Object> list){
+    protected JsonResult toJson(Object obj){
+        JsonResult retJson = JsonResult.success();
+        retJson.put("data",obj);
+        return retJson;
+    }
+
+    protected JsonResult toJsonWithPage(List list){
         JsonResult retJson = JsonResult.success();
         PageInfo page = new PageInfo(list);
         retJson.put("list",list);
@@ -57,11 +64,12 @@ public class BaseController {
     /*
     开启带总数查询的分页
      */
-    protected void startPageWithTotal(JSONObject json){
-        Integer pageNo = json.getInteger("pageNo");
-        Integer pageSize = json.getInteger("pageSize");
+    protected void startPageWithTotal(BaseEntity entity){
+        Integer pageNo = entity.getPageNo();
+        Integer pageSize = entity.getPageSize();
         pageNo = pageNo == null? 1: pageNo;
         pageSize = pageSize == null ? Config.PAGE_SIZE: pageSize;
+        pageSize = pageSize > Config.MAX_PAGE_SIZE ? Config.MAX_PAGE_SIZE: pageSize;
 
         PageHelper.startPage(pageNo,pageSize);
     }

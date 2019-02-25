@@ -25,6 +25,7 @@ public class FastJSONConfig {
          　　　　　 * SerializerFeature.SkipTransientField
          */
         fastJsonConfig.setSerializerFeatures(SerializerFeature.WriteMapNullValue);
+        fastJsonConfig.setSerializerFeatures(SerializerFeature.WriteDateUseDateFormat);
         //3处理中文乱码问题
         List<MediaType> fastMediaTypes = new ArrayList<>();
         fastMediaTypes.add(MediaType.APPLICATION_JSON_UTF8);

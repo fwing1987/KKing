@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kking.dao.mapper.TSysRoleMapper">
+    <resultMap id="SimpleResult" type="TSysRole">
+        <id property="id" column="id"/>
+            <result property="id" column="id"/>
+            <result property="roleName" column="role_name"/>
+            <result property="createTime" column="create_time"/>
+        <collection property="permList" ofType="TSysPerm">
+            <id property="resourceId" column="resource_id"/>
+            <result property="permName" column="perm_name"/>
+            <collection property="actionList" ofType="TSysAction">
+                <id property="id" column="action_id"/>
+                <result property="actionName" column="action_name"/>
+            </collection>
+        </collection>
+        </resultMap>
+    <sql id="SelectOneSql" >
+        select <trim suffixOverrides=","> id,  role_name,  create_time, </trim>
+        from t_sys_role
+    </sql>
+    <select id="selectById" resultType="TSysRole" parameterType="Integer">
+        <include refid="SelectOneSql"/>
+        where id=#{id}
+    </select>
+    <select id="selectList" resultType="TSysRole" parameterType="TSysRole">
+        <include refid="SelectOneSql"/>
+        <where>
+                    <if test="id != null "> and `id`=#{id}</if>
+                    <if test="roleName != null  and roleName != ''"> and `role_name`=#{roleName}</if>
+                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
+                </where>
+    </select>
+    <insert id="insert" parameterType="TSysRole" keyProperty="id" useGeneratedKeys="true">
+        insert into t_sys_role(
+        <trim suffixOverrides=",">
+                                    <if test="roleName != null  and roleName != ''">`role_name`,</if>
+                                <if test="createTime != null ">`create_time`,</if>
+                    </trim>
+        )values(
+        <trim suffixOverrides=",">
+                                    <if test="roleName != null  and roleName != ''">#{roleName},</if>
+                                <if test="createTime != null ">#{createTime},</if>
+                    </trim>
+        )
+    </insert>
+    <select id="selectOneByProperty" resultType="TSysRole">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <select id="selectListByProperty" resultType="TSysRole">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from t_sys_role where id=#{id}
+    </delete>
+    <update id="update" parameterType="TSysRole">
+        update t_sys_role set
+        <trim suffixOverrides=",">
+                                            <if test="roleName != null  and roleName != ''">`role_name`=#{roleName},</if>
+                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
+                        </trim>
+        where id=#{id}
+    </update>
+    <select id="getUserRoleInfo" resultMap="SimpleResult">
+        select r.id,r.role_name,r.create_time,
+               p.resource_id,p.perm_name,
+               a.id action_id,a.action_name
+        from t_sys_user_role ur,t_sys_role r,t_sys_role_perm rp,t_sys_perm p,t_sys_action a
+        where ur.role_id=rp.role_id and rp.perm_id=p.id and p.action_id=a.id and ur.role_id=r.id
+        and ur.user_id=#{arg0} and p.perm_type=#{arg1}
+    </select>
+</mapper>

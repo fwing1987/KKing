@@ -11,11 +11,19 @@
     </resultMap>
     <sql id="SelectOneSql" >
         select <trim suffixOverrides=",">#foreach($column in $columns) ${column.columnName}, #end</trim>
-        from dn_channel
+        from ${tableName}
     </sql>
-    <select id="selectOne" resultType="${table.xCamelName}" parameterType="Integer">
+    <select id="selectById" resultType="${table.xCamelName}" parameterType="Integer">
         <include refid="SelectOneSql"/>
         where ${primaryKey.columnName}=#{${primaryKey.camelName}}
+    </select>
+    <select id="selectList" resultType="${table.xCamelName}" parameterType="${table.xCamelName}">
+        <include refid="SelectOneSql"/>
+        <where>
+        #foreach($column in $columns)
+            <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end"> and `${column.columnName}`=#{${column.camelName}}</if>
+        #end
+        </where>
     </select>
     <insert id="insert" parameterType="${table.xCamelName}" keyProperty="${primaryKey.columnName}" useGeneratedKeys="true">
         insert into ${tableName}(
@@ -40,11 +48,15 @@
         <include refid="SelectOneSql"/>
         where ${arg0} = #{arg1}
     </select>
+    <select id="selectListByProperty" resultType="${table.xCamelName}">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
     <delete id="deleteById" parameterType="Integer">
         delete from ${tableName} where ${primaryKey.columnName}=#{${primaryKey.camelName}}
     </delete>
-    <update id="update" parameterType="DnChannel">
-        update dn_channel set
+    <update id="update" parameterType="${table.xCamelName}">
+        update ${tableName} set
         <trim suffixOverrides=",">
         #foreach($column in $columns)
         #if (${column.columnName}!=${primaryKey.columnName})

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kking.dao.mapper.TSysUserMapper">
+    <resultMap id="SimpleResult" type="TSysUser">
+        <id property="id" column="id"/>
+            <result property="id" column="id"/>
+            <result property="userName" column="user_name"/>
+            <result property="password" column="password"/>
+            <result property="nick" column="nick"/>
+            <result property="salt" column="salt"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+            <result property="state" column="state"/>
+            <result property="avatar" column="avatar"/>
+        </resultMap>
+    <sql id="SelectOneSql" >
+        select <trim suffixOverrides=","> id,  user_name,  password,  nick,  salt,  create_time,  update_time,  state,  avatar, </trim>
+        from t_sys_user
+    </sql>
+    <select id="selectById" resultType="TSysUser" parameterType="Integer">
+        <include refid="SelectOneSql"/>
+        where id=#{id}
+    </select>
+    <select id="selectList" resultType="TSysUser" parameterType="TSysUser">
+        <include refid="SelectOneSql"/>
+        <where>
+                    <if test="id != null "> and `id`=#{id}</if>
+                    <if test="userName != null  and userName != ''"> and `user_name`=#{userName}</if>
+                    <if test="password != null  and password != ''"> and `password`=#{password}</if>
+                    <if test="nick != null  and nick != ''"> and `nick`=#{nick}</if>
+                    <if test="salt != null  and salt != ''"> and `salt`=#{salt}</if>
+                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
+                    <if test="updateTime != null "> and `update_time`=#{updateTime}</if>
+                    <if test="state != null "> and `state`=#{state}</if>
+                    <if test="avatar != null  and avatar != ''"> and `avatar`=#{avatar}</if>
+                </where>
+    </select>
+    <insert id="insert" parameterType="TSysUser" keyProperty="id" useGeneratedKeys="true">
+        insert into t_sys_user(
+        <trim suffixOverrides=",">
+                                    <if test="userName != null  and userName != ''">`user_name`,</if>
+                                <if test="password != null  and password != ''">`password`,</if>
+                                <if test="nick != null  and nick != ''">`nick`,</if>
+                                <if test="salt != null  and salt != ''">`salt`,</if>
+                                <if test="createTime != null ">`create_time`,</if>
+                                <if test="updateTime != null ">`update_time`,</if>
+                                <if test="state != null ">`state`,</if>
+                                <if test="avatar != null  and avatar != ''">`avatar`,</if>
+                    </trim>
+        )values(
+        <trim suffixOverrides=",">
+                                    <if test="userName != null  and userName != ''">#{userName},</if>
+                                <if test="password != null  and password != ''">#{password},</if>
+                                <if test="nick != null  and nick != ''">#{nick},</if>
+                                <if test="salt != null  and salt != ''">#{salt},</if>
+                                <if test="createTime != null ">#{createTime},</if>
+                                <if test="updateTime != null ">#{updateTime},</if>
+                                <if test="state != null ">#{state},</if>
+                                <if test="avatar != null  and avatar != ''">#{avatar},</if>
+                    </trim>
+        )
+    </insert>
+    <select id="selectOneByProperty" resultType="TSysUser">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <select id="selectListByProperty" resultType="TSysUser">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from t_sys_user where id=#{id}
+    </delete>
+    <update id="update" parameterType="TSysUser">
+        update t_sys_user set
+        <trim suffixOverrides=",">
+                                            <if test="userName != null  and userName != ''">`user_name`=#{userName},</if>
+                                    <if test="password != null  and password != ''">`password`=#{password},</if>
+                                    <if test="nick != null  and nick != ''">`nick`=#{nick},</if>
+                                    <if test="salt != null  and salt != ''">`salt`=#{salt},</if>
+                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
+                                    <if test="updateTime != null ">`update_time`=#{updateTime},</if>
+                                    <if test="state != null ">`state`=#{state},</if>
+                                    <if test="avatar != null  and avatar != ''">`avatar`=#{avatar},</if>
+                        </trim>
+        where id=#{id}
+    </update>
+
+</mapper>

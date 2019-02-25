@@ -1,5 +1,7 @@
 package com.kking.generator.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.kking.common.utils.StringUtils;
 import com.kking.generator.entity.ColumnInfo;
 import com.kking.generator.entity.TableInfo;
@@ -36,12 +38,24 @@ public class GenServiceImpl implements GenService {
     }
 
     @Override
-    public byte[] generateCode(String tableName,String packageName) {
+    public byte[] generateCode(String tableParam,String packageName) {
+        Object retObj = JSON.parse(tableParam);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ZipOutputStream zip = new ZipOutputStream(out);
-        TableInfo table = genMapper.selectTable(tableName);
-        List<ColumnInfo> columns = getColumns(tableName);
-        generateCode(table,columns,zip,packageName);
+        if(retObj instanceof JSONArray){
+            for(int i = 0;i < ((JSONArray) retObj).size();i++){
+                String tableName = ((JSONArray) retObj).getString(i);
+                TableInfo table = genMapper.selectTable(tableName);
+                List<ColumnInfo> columns = getColumns(tableName);
+                generateCode(table,columns,zip,packageName);
+            }
+        }else{
+            TableInfo table = genMapper.selectTable(tableParam);
+            List<ColumnInfo> columns = getColumns(tableParam);
+            generateCode(table,columns,zip,packageName);
+        }
+
+
         IOUtils.closeQuietly(zip);
         return out.toByteArray();
     }

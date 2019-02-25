@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kking.dao.mapper.TSysMenuMapper">
+    <resultMap id="SimpleResult" type="TSysMenu">
+        <id property="id" column="id"/>
+            <result property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="pid" column="pid"/>
+            <result property="permId" column="perm_id"/>
+            <result property="type" column="type"/>
+            <result property="path" column="path"/>
+            <result property="component" column="component"/>
+            <result property="icon" column="icon"/>
+            <result property="state" column="state"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+            <result property="sort" column="sort"/>
+        </resultMap>
+    <sql id="SelectOneSql" >
+        select <trim suffixOverrides=","> id,  name,  pid,  perm_id,  type,  path,  component,  icon,  state,  create_time,  update_time,  sort, </trim>
+        from t_sys_menu
+    </sql>
+    <select id="selectById" resultType="TSysMenu" parameterType="Integer">
+        <include refid="SelectOneSql"/>
+        where id=#{id}
+    </select>
+    <select id="selectList" resultType="TSysMenu" parameterType="TSysMenu">
+        <include refid="SelectOneSql"/>
+        <where>
+                    <if test="name != null  and name != ''"> and `name`=#{name}</if>
+                    <if test="type != null  and type != ''"> and `type`=#{type}</if>
+                    <if test="path != null  and path != ''"> and `path`=#{path}</if>
+                    <if test="component != null  and component != ''"> and `component`=#{component}</if>
+                    <if test="icon != null  and icon != ''"> and `icon`=#{icon}</if>
+                    <if test="state != null "> and `state`=#{state}</if>
+                    <if test="beginTime != null and beginTime != ''"> and `create_time`&gt;=#{beginTime}</if>
+                    <if test="endTime != null and endTime != ''"> and `create_time`&lt;=#{endTime}</if>
+                </where>
+        order by pid desc,sort
+    </select>
+    <insert id="insert" parameterType="TSysMenu" keyProperty="id" useGeneratedKeys="true">
+        insert into t_sys_menu(
+        <trim suffixOverrides=",">
+                                    <if test="name != null  and name != ''">`name`,</if>
+                                <if test="pid != null ">`pid`,</if>
+                                <if test="permId != null ">`perm_id`,</if>
+                                <if test="type != null  and type != ''">`type`,</if>
+                                <if test="path != null  and path != ''">`path`,</if>
+                                <if test="component != null  and component != ''">`component`,</if>
+                                <if test="icon != null  and icon != ''">`icon`,</if>
+                                <if test="state != null ">`state`,</if>
+                                <if test="createTime != null ">`create_time`,</if>
+                                <if test="updateTime != null ">`update_time`,</if>
+                                <if test="sort != null ">`sort`,</if>
+                    </trim>
+        )values(
+        <trim suffixOverrides=",">
+                                    <if test="name != null  and name != ''">#{name},</if>
+                                <if test="pid != null ">#{pid},</if>
+                                <if test="permId != null ">#{permId},</if>
+                                <if test="type != null  and type != ''">#{type},</if>
+                                <if test="path != null  and path != ''">#{path},</if>
+                                <if test="component != null  and component != ''">#{component},</if>
+                                <if test="icon != null  and icon != ''">#{icon},</if>
+                                <if test="state != null ">#{state},</if>
+                                <if test="createTime != null ">#{createTime},</if>
+                                <if test="updateTime != null ">#{updateTime},</if>
+                                <if test="sort != null ">#{sort},</if>
+                    </trim>
+        )
+    </insert>
+    <select id="selectOneByProperty" resultType="TSysMenu">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <select id="selectListByProperty" resultType="TSysMenu">
+        <include refid="SelectOneSql"/>
+        where ${arg0} = #{arg1}
+    </select>
+    <delete id="deleteById" parameterType="Integer">
+        delete from t_sys_menu where id=#{id}
+    </delete>
+    <update id="update" parameterType="TSysMenu">
+        update t_sys_menu set
+        <trim suffixOverrides=",">
+                                            <if test="name != null  and name != ''">`name`=#{name},</if>
+                                    <if test="pid != null ">`pid`=#{pid},</if>
+                                    <if test="permId != null ">`perm_id`=#{permId},</if>
+                                    <if test="type != null  and type != ''">`type`=#{type},</if>
+                                    <if test="path != null  and path != ''">`path`=#{path},</if>
+                                    <if test="component != null  and component != ''">`component`=#{component},</if>
+                                    <if test="icon != null  and icon != ''">`icon`=#{icon},</if>
+                                    <if test="state != null ">`state`=#{state},</if>
+                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
+                                    <if test="sort != null ">`sort`=#{sort},</if>
+                        </trim>
+        where id=#{id}
+    </update>
+    <select id="getUserMenu" resultType="TSysMenu" parameterType="TSysMenu">
+        select * from (
+        <if test="userId != null">
+            select m.*,a.action_name,p.perm_name from t_sys_user_role ur,t_sys_role_perm rp,t_sys_menu m
+            left join t_sys_perm p on m.perm_id=p.id left join t_sys_action a on p.action_id=a.id
+            where ur.role_id=rp.role_id
+            and m.perm_id=rp.perm_id
+            and ur.user_id=#{userId}
+        union all
+            select m.*,'' action_name,'' perm_name from t_sys_menu m
+            where m.perm_id is null
+        </if>
+        <if test="userId == null">
+            select m.*,a.action_name,p.perm_name from t_sys_menu m
+            left join t_sys_perm p on m.perm_id=p.id
+            left join t_sys_action a on p.action_id=a.id
+        </if>
+
+        ) a
+        <where>
+            <if test="name != null  and name != ''"> and `name` like concat('%',#{name},'%')</if>
+            <if test="type != null  and type != '' and type == 'MENU'"> and `type` in ('D','M')</if>
+            <if test="type != null  and type != '' and type != 'MENU'"> and `type`=#{type}</if>
+            <if test="path != null  and path != ''"> and `path`=#{path}</if>
+            <if test="component != null  and component != ''"> and `component`=#{component}</if>
+            <if test="icon != null  and icon != ''"> and `icon`=#{icon}</if>
+            <if test="state != null "> and `state`=#{state}</if>
+            <if test="beginTime != null and beginTime != ''"> and `create_time`&gt;=#{beginTime}</if>
+            <if test="endTime != null and endTime != ''"> and `create_time`&lt;=#{endTime}</if>
+        </where>
+        order by a.pid desc,a.sort
+    </select>
+</mapper>

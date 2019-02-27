@@ -5,10 +5,10 @@
 <mapper namespace="com.kking.dao.mapper.TSysActionMapper">
     <resultMap id="SimpleResult" type="TSysAction">
         <id property="id" column="id"/>
-            <result property="id" column="id"/>
-            <result property="actionName" column="action_name"/>
-            <result property="createTime" column="create_time"/>
-        </resultMap>
+        <result property="id" column="id"/>
+        <result property="actionName" column="action_name"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
     <sql id="SelectOneSql" >
         select <trim suffixOverrides=","> id,  action_name,  create_time, </trim>
         from t_sys_action
@@ -20,22 +20,22 @@
     <select id="selectList" resultType="TSysAction" parameterType="TSysAction">
         <include refid="SelectOneSql"/>
         <where>
-                    <if test="id != null "> and `id`=#{id}</if>
-                    <if test="actionName != null  and actionName != ''"> and `action_name`=#{actionName}</if>
-                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
-                </where>
+            <if test="id != null "> and `id`=#{id}</if>
+            <if test="actionName != null  and actionName != ''"> and `action_name`=#{actionName}</if>
+            <if test="createTime != null "> and `create_time`=#{createTime}</if>
+        </where>
     </select>
     <insert id="insert" parameterType="TSysAction" keyProperty="id" useGeneratedKeys="true">
         insert into t_sys_action(
         <trim suffixOverrides=",">
-                                    <if test="actionName != null  and actionName != ''">`action_name`,</if>
-                                <if test="createTime != null ">`create_time`,</if>
-                    </trim>
+            <if test="actionName != null  and actionName != ''">`action_name`,</if>
+            <if test="createTime != null ">`create_time`,</if>
+        </trim>
         )values(
         <trim suffixOverrides=",">
-                                    <if test="actionName != null  and actionName != ''">#{actionName},</if>
-                                <if test="createTime != null ">#{createTime},</if>
-                    </trim>
+            <if test="actionName != null  and actionName != ''">#{actionName},</if>
+            <if test="createTime != null ">#{createTime},</if>
+        </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysAction">
@@ -52,9 +52,9 @@
     <update id="update" parameterType="TSysAction">
         update t_sys_action set
         <trim suffixOverrides=",">
-                                            <if test="actionName != null  and actionName != ''">`action_name`=#{actionName},</if>
-                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
-                        </trim>
+            <if test="actionName != null  and actionName != ''">`action_name`=#{actionName},</if>
+            <if test="createTime != null ">`create_time`=#{createTime},</if>
+        </trim>
         where id=#{id}
     </update>
 

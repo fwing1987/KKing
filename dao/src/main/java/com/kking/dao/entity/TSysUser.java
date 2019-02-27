@@ -2,6 +2,7 @@ package com.kking.dao.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class TSysUser extends BaseEntity{
     private Integer id;
@@ -13,6 +14,8 @@ public class TSysUser extends BaseEntity{
     private Date updateTime;
     private Integer state;
     private String avatar;
+
+    private List<TSysRole> roleList;
 
     private static final long serialVersionUID = 1L;
 
@@ -88,6 +91,13 @@ public class TSysUser extends BaseEntity{
         this.avatar = avatar;
     }
 
+    public List<TSysRole> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<TSysRole> roleList) {
+        this.roleList = roleList;
+    }
 
     @Override
     public String toString() {

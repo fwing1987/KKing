@@ -5,11 +5,11 @@
 <mapper namespace="com.kking.dao.mapper.TSysRolePermMapper">
     <resultMap id="SimpleResult" type="TSysRolePerm">
         <id property="id" column="id"/>
-            <result property="id" column="id"/>
-            <result property="roleId" column="role_id"/>
-            <result property="permId" column="perm_id"/>
-            <result property="createTime" column="create_time"/>
-        </resultMap>
+        <result property="id" column="id"/>
+        <result property="roleId" column="role_id"/>
+        <result property="permId" column="perm_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
     <sql id="SelectOneSql" >
         select <trim suffixOverrides=","> id,  role_id,  perm_id,  create_time, </trim>
         from t_sys_role_perm
@@ -21,25 +21,25 @@
     <select id="selectList" resultType="TSysRolePerm" parameterType="TSysRolePerm">
         <include refid="SelectOneSql"/>
         <where>
-                    <if test="id != null "> and `id`=#{id}</if>
-                    <if test="roleId != null "> and `role_id`=#{roleId}</if>
-                    <if test="permId != null "> and `perm_id`=#{permId}</if>
-                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
-                </where>
+            <if test="id != null "> and `id`=#{id}</if>
+            <if test="roleId != null "> and `role_id`=#{roleId}</if>
+            <if test="permId != null "> and `perm_id`=#{permId}</if>
+            <if test="createTime != null "> and `create_time`=#{createTime}</if>
+        </where>
     </select>
     <insert id="insert" parameterType="TSysRolePerm" keyProperty="id" useGeneratedKeys="true">
         insert into t_sys_role_perm(
         <trim suffixOverrides=",">
-                                    <if test="roleId != null ">`role_id`,</if>
-                                <if test="permId != null ">`perm_id`,</if>
-                                <if test="createTime != null ">`create_time`,</if>
-                    </trim>
+            <if test="roleId != null ">`role_id`,</if>
+            <if test="permId != null ">`perm_id`,</if>
+            <if test="createTime != null ">`create_time`,</if>
+        </trim>
         )values(
         <trim suffixOverrides=",">
-                                    <if test="roleId != null ">#{roleId},</if>
-                                <if test="permId != null ">#{permId},</if>
-                                <if test="createTime != null ">#{createTime},</if>
-                    </trim>
+            <if test="roleId != null ">#{roleId},</if>
+            <if test="permId != null ">#{permId},</if>
+            <if test="createTime != null ">#{createTime},</if>
+        </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysRolePerm">
@@ -56,11 +56,20 @@
     <update id="update" parameterType="TSysRolePerm">
         update t_sys_role_perm set
         <trim suffixOverrides=",">
-                                            <if test="roleId != null ">`role_id`=#{roleId},</if>
-                                    <if test="permId != null ">`perm_id`=#{permId},</if>
-                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
-                        </trim>
+            <if test="roleId != null ">`role_id`=#{roleId},</if>
+            <if test="permId != null ">`perm_id`=#{permId},</if>
+            <if test="createTime != null ">`create_time`=#{createTime},</if>
+        </trim>
         where id=#{id}
     </update>
+    <delete id="delete" parameterType="TSysRolePerm">
+        delete from t_sys_role_perm
+        <where>
+            <if test="id != null "> and `id`=#{id}</if>
+            <if test="roleId != null "> and `role_id`=#{roleId}</if>
+            <if test="permId != null "> and `perm_id`=#{permId}</if>
+            <if test="createTime != null "> and `create_time`=#{createTime}</if>
+        </where>
+    </delete>
 
 </mapper>

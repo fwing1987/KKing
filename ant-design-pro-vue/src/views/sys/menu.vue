@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-card style="margin-bottom:10px">
+    <a-card style="margin-bottom:10px" v-action:list>
       <a-form layout="inline">
         <a-row :gutter="16" type="flex" justify="start">
           <a-col :span="6">
@@ -9,7 +9,7 @@
             </a-form-item>
           </a-col>
           <a-col :span="6">
-            <a-form-item label="类型：" :label-col="{ xs: { span: 6 } }" :wrapperCol="{ xs: { span: 18 } }">
+            <a-form-item label="类型：">
               <a-radio-group v-model="params.state">
                 <a-radio-button value="0">显示</a-radio-button>
                 <a-radio-button value="1">禁用</a-radio-button>
@@ -17,7 +17,7 @@
             </a-form-item>
           </a-col>
           <a-col :span="6">
-            <a-form-item :label-col="labelCol" :wrapper-col="wrapperCol">
+            <a-form-item>
               <a-button type="primary" @click="getData"> <a-icon type="search"></a-icon>搜索 </a-button>
             </a-form-item>
           </a-col>
@@ -110,6 +110,9 @@
         <a-form-item label="图标：" v-show="menuParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input type="text" v-decorator="['icon']"> </a-input>
         </a-form-item>
+        <a-form-item label="排序：" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-input type="number" v-decorator="['sort']"> </a-input>
+        </a-form-item>
         <a-form-item label="类型：" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-radio-group
             buttonStyle="solid"
@@ -147,6 +150,7 @@ export default {
       this.parentMenuTreeSelected = extra.selectedNodes[0].data.props
     },
     getMenuById (data, id) {
+      if (!id) return null
       for (var i = 0; i < data.length; i++) {
         if (data[i].id === id) {
           return data[i]
@@ -174,13 +178,23 @@ export default {
     },
     addMenuClick () {
       if (this.tableSelected.type === 'B') {
-        this.$message.error('按钮下不能创建子项', 5)
+        this.$error('按钮下不能创建子项', 5)
         return
       }
       this.editType = 'add'
       this.initMenuParams()
       this.menuParams.pMenu = this.tableSelected.name ? this.tableSelected.name : '主菜单'
       this.menuParams.pid = this.tableSelected.id ? this.tableSelected.id : 0
+      if (this.tableSelected.type === 'M') {
+        this.menuParams.type = 'B'
+      }
+      var parentMenu = this.getMenuById(this.modalTreeData, this.tableSelected.pid)
+      if (this.tableSelected.type === 'B' && this.parentMenu.permName) {
+        this.menuParams.permName = this.parentMenu.permName
+      } else if(this.tableSelected.permName) {
+        this.menuParams.permName = this.tableSelected.permName
+      }
+      
       this.showMenuModal = true
     },
     editMenuClick () {
@@ -203,7 +217,7 @@ export default {
     },
     deleteMenuClick () {
       if (!this.tableSelected.id) {
-        this.$message.warning('请选择要修改的菜单项', 5)
+        this.$message.warning('请选择要删除的菜单项', 5)
         return
       }
       this.$confirm({
@@ -215,7 +229,7 @@ export default {
               this.$message.success('删除成功', 5)
               this.getData()
             } else {
-              this.$message.error(`删除失败：${res.msg}`, 5)
+              this.$error(`删除失败：${res.msg}`, 5)
             }
           })
         }
@@ -251,7 +265,7 @@ export default {
                 this.$message.success('添加成功', 5)
                 this.getData()
               } else {
-                this.$message.error(`添加失败：${res.msg}`, 5)
+                this.$error(`添加失败：${res.msg}`, 5)
               }
             })
           } else if (this.editType === 'update') {
@@ -261,7 +275,7 @@ export default {
                 this.$message.success('修改成功', 5)
                 this.getData()
               } else {
-                this.$message.error(`修改失败：${res.msg}`, 5)
+                this.$error(`修改失败：${res.msg}`, 5)
               }
             })
           }

@@ -21,8 +21,8 @@ public class MyExceptionHandler implements HandlerExceptionResolver {
             attributes.put("code", "1000001");
             attributes.put("msg", "token错误");
         } else if (ex instanceof UnauthorizedException) {
-            attributes.put("code", "1000002");
-            attributes.put("msg", "用户无权限");
+            httpServletResponse.setStatus(403);
+            return mv;
         } else {
             attributes.put("code", "1000003");
             attributes.put("msg", ex.getMessage());

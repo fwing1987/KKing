@@ -5,11 +5,11 @@
 <mapper namespace="com.kking.dao.mapper.TSysUserRoleMapper">
     <resultMap id="SimpleResult" type="TSysUserRole">
         <id property="id" column="id"/>
-            <result property="id" column="id"/>
-            <result property="userId" column="user_id"/>
-            <result property="roleId" column="role_id"/>
-            <result property="createTime" column="create_time"/>
-        </resultMap>
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="roleId" column="role_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
     <sql id="SelectOneSql" >
         select <trim suffixOverrides=","> id,  user_id,  role_id,  create_time, </trim>
         from t_sys_user_role
@@ -21,25 +21,25 @@
     <select id="selectList" resultType="TSysUserRole" parameterType="TSysUserRole">
         <include refid="SelectOneSql"/>
         <where>
-                    <if test="id != null "> and `id`=#{id}</if>
-                    <if test="userId != null "> and `user_id`=#{userId}</if>
-                    <if test="roleId != null "> and `role_id`=#{roleId}</if>
-                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
-                </where>
+            <if test="id != null "> and `id`=#{id}</if>
+            <if test="userId != null "> and `user_id`=#{userId}</if>
+            <if test="roleId != null "> and `role_id`=#{roleId}</if>
+            <if test="createTime != null "> and `create_time`=#{createTime}</if>
+        </where>
     </select>
     <insert id="insert" parameterType="TSysUserRole" keyProperty="id" useGeneratedKeys="true">
         insert into t_sys_user_role(
         <trim suffixOverrides=",">
-                                    <if test="userId != null ">`user_id`,</if>
-                                <if test="roleId != null ">`role_id`,</if>
-                                <if test="createTime != null ">`create_time`,</if>
-                    </trim>
+            <if test="userId != null ">`user_id`,</if>
+            <if test="roleId != null ">`role_id`,</if>
+            <if test="createTime != null ">`create_time`,</if>
+        </trim>
         )values(
         <trim suffixOverrides=",">
-                                    <if test="userId != null ">#{userId},</if>
-                                <if test="roleId != null ">#{roleId},</if>
-                                <if test="createTime != null ">#{createTime},</if>
-                    </trim>
+            <if test="userId != null ">#{userId},</if>
+            <if test="roleId != null ">#{roleId},</if>
+            <if test="createTime != null ">#{createTime},</if>
+        </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysUserRole">
@@ -56,10 +56,10 @@
     <update id="update" parameterType="TSysUserRole">
         update t_sys_user_role set
         <trim suffixOverrides=",">
-                                            <if test="userId != null ">`user_id`=#{userId},</if>
-                                    <if test="roleId != null ">`role_id`=#{roleId},</if>
-                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
-                        </trim>
+            <if test="userId != null ">`user_id`=#{userId},</if>
+            <if test="roleId != null ">`role_id`=#{roleId},</if>
+            <if test="createTime != null ">`create_time`=#{createTime},</if>
+        </trim>
         where id=#{id}
     </update>
 

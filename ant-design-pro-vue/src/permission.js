@@ -6,7 +6,7 @@ import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import notification from 'ant-design-vue/es/notification'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
-import { UserLayout, BasicLayout, RouteView, BlankLayout, PageView } from '@/components/layouts'
+import { PageView } from '@/components/layouts'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
@@ -24,9 +24,8 @@ const makeRoutesSafe = (routes, deep) => {
       route.component = PageView
       route.redirect = route.children[0].path
     } else {
-      let componentPath = route.component
+      const componentPath = route.component
       route.component = () => import(`@/views/${componentPath}`)
-      console.log(route.component)
     }
     if (route.children) {
       makeRoutesSafe(route.children, ++deep)
@@ -36,9 +35,8 @@ const makeRoutesSafe = (routes, deep) => {
 }
 export const addRoutes = (newRoutes) => {
   makeRoutesSafe(newRoutes, 0)
-  store.commit('SET_ROUTERS',newRoutes)
+  store.commit('SET_ROUTERS', newRoutes)
   router.addRoutes(store.getters.addRouters)
-  console.log(store.getters.addRouters)
 }
 
 router.beforeEach((to, from, next) => {
@@ -80,7 +78,6 @@ router.beforeEach((to, from, next) => {
             // })
           })
           .catch((e) => {
-            debugger
             notification.error({
               message: '错误',
               description: '请求用户信息失败，请重试'
@@ -124,13 +121,13 @@ router.afterEach(() => {
  *  @see https://github.com/sendya/ant-design-pro-vue/pull/53
  */
 function hasAction (actionName, permName) {
-  if (!permName && this.$route) {
+  if (!permName && this && this.$route) {
     permName = this.$route.meta.permissionId
-  } 
+  }
   if (!permName) return
 
   const roles = store.getters.roles
-  let actions = []
+  const actions = []
   roles.forEach(role => {
     role.permList.forEach(p => {
       if (p.permName !== permName) {
@@ -139,7 +136,7 @@ function hasAction (actionName, permName) {
       actions.push(...p.actionList)
     })
   })
-  return actions.indexOf(actionName) >= 0 
+  return actions.indexOf(actionName) >= 0
 }
 
 Vue.prototype.$hasAction = hasAction
@@ -148,7 +145,7 @@ const action = Vue.directive('action', {
   bind: function (el, binding, vnode) {
     const actionName = binding.arg
     const permissionId = vnode.context.$route.meta.permissionId
-    
+
     if (!hasAction(actionName, permissionId)) {
       setTimeout(() => {
         if (el.parentNode == null) {

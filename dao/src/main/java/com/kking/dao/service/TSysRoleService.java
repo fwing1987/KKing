@@ -1,5 +1,6 @@
 package com.kking.dao.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kking.dao.entity.TSysRole;
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface TSysRoleService {
     public int update(TSysRole tSysRole);
 
     public List<TSysRole> getUserRoleInfo(Integer userId,String permType);
+
+    boolean editPermission(JSONObject json);
 }

@@ -56,12 +56,10 @@ public class UserController extends BaseController{
     }
 
     @RequestMapping("/login")
-    public JsonResult login(@RequestBody JSONObject json){
-        String user = json.getString("username");
-        String pass = json.getString("password");
+    public JsonResult login(@RequestBody TSysUser user){
         Subject subject = SecurityUtils.getSubject();
         try {
-            UsernamePasswordToken token = new UsernamePasswordToken(user, pass);
+            UsernamePasswordToken token = new UsernamePasswordToken(user.getUserName(), user.getPassword());
             subject.login(token);
         }catch (Exception e){
             log.error("",e);

@@ -19,7 +19,7 @@
               type="text"
               placeholder="帐户名或邮箱地址 / admin"
               v-decorator="[
-                'username',
+                'userName',
                 {rules: [{ required: true, message: '请输入帐户名或邮箱地址' }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
               ]"
             >
@@ -181,14 +181,14 @@ export default {
 
       state.loginBtn = true
 
-      const validateFieldsKey = customActiveKey === 'tab1' ? ['username', 'password'] : ['mobile', 'captcha']
+      const validateFieldsKey = customActiveKey === 'tab1' ? ['userName', 'password'] : ['mobile', 'captcha']
 
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
           console.log('login form', values)
           const loginParams = { ...values }
-          delete loginParams.username
-          loginParams[!state.loginType ? 'email' : 'username'] = values.username
+          delete loginParams.userName
+          loginParams[!state.loginType ? 'email' : 'userName'] = values.userName
           loginParams.password = values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))

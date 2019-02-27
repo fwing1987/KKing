@@ -11,4 +11,6 @@ public interface TSysRolePermMapper {
     public int insert(TSysRolePerm tSysRolePerm);
     public int deleteById(Integer id);
     public int update(TSysRolePerm tSysRolePerm);
+
+    public int delete(TSysRolePerm rolePermCond);
 }

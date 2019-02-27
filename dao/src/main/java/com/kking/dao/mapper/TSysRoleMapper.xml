@@ -5,9 +5,11 @@
 <mapper namespace="com.kking.dao.mapper.TSysRoleMapper">
     <resultMap id="SimpleResult" type="TSysRole">
         <id property="id" column="id"/>
-            <result property="id" column="id"/>
-            <result property="roleName" column="role_name"/>
-            <result property="createTime" column="create_time"/>
+        <result property="id" column="id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleDesc" column="role_desc"/>
+        <result property="createTime" column="create_time"/>
+        <result property="state" column="state"/>
         <collection property="permList" ofType="TSysPerm">
             <id property="resourceId" column="resource_id"/>
             <result property="permName" column="perm_name"/>
@@ -18,7 +20,7 @@
         </collection>
         </resultMap>
     <sql id="SelectOneSql" >
-        select <trim suffixOverrides=","> id,  role_name,  create_time, </trim>
+        select <trim suffixOverrides=","> id,  role_name,  role_desc,  create_time,  state, </trim>
         from t_sys_role
     </sql>
     <select id="selectById" resultType="TSysRole" parameterType="Integer">
@@ -28,22 +30,28 @@
     <select id="selectList" resultType="TSysRole" parameterType="TSysRole">
         <include refid="SelectOneSql"/>
         <where>
-                    <if test="id != null "> and `id`=#{id}</if>
-                    <if test="roleName != null  and roleName != ''"> and `role_name`=#{roleName}</if>
-                    <if test="createTime != null "> and `create_time`=#{createTime}</if>
-                </where>
+            <if test="id != null "> and `id`=#{id}</if>
+            <if test="roleName != null  and roleName != ''"> and `role_name` like concat('%',#{roleName},'%')</if>
+            <if test="roleDesc != null  and roleDesc != ''"> and `role_desc` like concat('%',#{roleDesc},'%')</if>
+            <if test="createTime != null "> and `create_time`=#{createTime}</if>
+            <if test="state != null "> and `state`=#{state}</if>
+        </where>
     </select>
     <insert id="insert" parameterType="TSysRole" keyProperty="id" useGeneratedKeys="true">
         insert into t_sys_role(
         <trim suffixOverrides=",">
-                                    <if test="roleName != null  and roleName != ''">`role_name`,</if>
-                                <if test="createTime != null ">`create_time`,</if>
-                    </trim>
+            <if test="roleName != null  and roleName != ''">`role_name`,</if>
+            <if test="roleDesc != null  and roleDesc != ''">`role_desc`,</if>
+            <if test="createTime != null ">`create_time`,</if>
+            <if test="state != null ">`state`,</if>
+        </trim>
         )values(
         <trim suffixOverrides=",">
-                                    <if test="roleName != null  and roleName != ''">#{roleName},</if>
-                                <if test="createTime != null ">#{createTime},</if>
-                    </trim>
+            <if test="roleName != null  and roleName != ''">#{roleName},</if>
+            <if test="roleDesc != null  and roleDesc != ''">#{roleDesc},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="state != null ">#{state},</if>
+        </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysRole">
@@ -60,9 +68,11 @@
     <update id="update" parameterType="TSysRole">
         update t_sys_role set
         <trim suffixOverrides=",">
-                                            <if test="roleName != null  and roleName != ''">`role_name`=#{roleName},</if>
-                                    <if test="createTime != null ">`create_time`=#{createTime},</if>
-                        </trim>
+            <if test="roleName != null  and roleName != ''">`role_name`=#{roleName},</if>
+            <if test="roleDesc != null  and roleDesc != ''">`role_desc`=#{roleDesc},</if>
+            <if test="createTime != null ">`create_time`=#{createTime},</if>
+            <if test="state != null ">`state`=#{state},</if>
+        </trim>
         where id=#{id}
     </update>
     <select id="getUserRoleInfo" resultMap="SimpleResult">

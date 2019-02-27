@@ -7,7 +7,10 @@ import java.util.List;
 public class TSysRole extends BaseEntity{
     private Integer id;
     private String roleName;
+    private String roleDesc;
     private Date createTime;
+    private Integer state;
+
     private List<TSysPerm> permList;
 
     private static final long serialVersionUID = 1L;
@@ -28,6 +31,14 @@ public class TSysRole extends BaseEntity{
         this.roleName = roleName;
     }
 
+    public String getRoleDesc() {
+        return roleDesc;
+    }
+
+    public void setRoleDesc(String roleDesc) {
+        this.roleDesc = roleDesc;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -44,6 +55,14 @@ public class TSysRole extends BaseEntity{
         this.permList = permList;
     }
 
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -52,7 +71,9 @@ public class TSysRole extends BaseEntity{
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", roleName=").append(roleName);
+        sb.append(", roleDesc=").append(roleDesc);
         sb.append(", createTime=").append(createTime);
+        sb.append(", state=").append(state);
         sb.append("]");
         return sb.toString();
     }

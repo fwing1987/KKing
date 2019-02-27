@@ -23,6 +23,7 @@ public class TSysMenu extends BaseEntity{
     private Integer sort;
     private Integer userId;
     private String permName;
+    private Integer roleId;
 
     private static final long serialVersionUID = 1L;
 
@@ -144,6 +145,14 @@ public class TSysMenu extends BaseEntity{
 
     public void setPermName(String permName) {
         this.permName = permName;
+    }
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
     @Override

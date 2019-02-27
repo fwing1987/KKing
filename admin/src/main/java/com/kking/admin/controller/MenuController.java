@@ -6,6 +6,7 @@ import com.kking.dao.entity.TSysMenu;
 import com.kking.dao.entity.TSysPerm;
 import com.kking.dao.service.TSysActionService;
 import com.kking.dao.service.TSysMenuService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class MenuController extends BaseController{
     @Autowired
     TSysActionService actionService;
 
+    @RequiresPermissions("menu:list")
     @RequestMapping("list")
     public JsonResult list(@RequestBody TSysMenu menu){
         JSONObject retJson = new JSONObject();
@@ -33,16 +35,19 @@ public class MenuController extends BaseController{
         return toJson(retJson);
     }
 
+    @RequiresPermissions("menu:add")
     @RequestMapping("add")
     public JsonResult add(@RequestBody TSysMenu menu){
         return toJson(menuService.insert(menu));
     }
 
+    @RequiresPermissions("menu:edit")
     @RequestMapping("update")
     public JsonResult update(@RequestBody TSysMenu menu){
         return toJson(menuService.update(menu));
     }
 
+    @RequiresPermissions("menu:remove")
     @RequestMapping("delete")
     public JsonResult delete(@RequestParam Integer id){
         return toJson(menuService.deleteById(id));

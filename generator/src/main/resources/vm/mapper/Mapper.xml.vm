@@ -5,9 +5,9 @@
 <mapper namespace="${packageName}.${moduleName}.${table.xCamelName}Mapper">
     <resultMap id="SimpleResult" type="${table.xCamelName}">
         <id property="${primaryKey.camelName}" column="${primaryKey.columnName}"/>
-    #foreach($column in $columns)
+#foreach($column in $columns)
         <result property="${column.camelName}" column="${column.columnName}"/>
-    #end
+#end
     </resultMap>
     <sql id="SelectOneSql" >
         select <trim suffixOverrides=",">#foreach($column in $columns) ${column.columnName}, #end</trim>
@@ -20,27 +20,27 @@
     <select id="selectList" resultType="${table.xCamelName}" parameterType="${table.xCamelName}">
         <include refid="SelectOneSql"/>
         <where>
-        #foreach($column in $columns)
+#foreach($column in $columns)
             <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end"> and `${column.columnName}`=#{${column.camelName}}</if>
-        #end
+#end
         </where>
     </select>
     <insert id="insert" parameterType="${table.xCamelName}" keyProperty="${primaryKey.columnName}" useGeneratedKeys="true">
         insert into ${tableName}(
         <trim suffixOverrides=",">
-    #foreach($column in $columns)
-        #if (${column.columnName}!=${primaryKey.columnName})
+#foreach($column in $columns)
+#if (${column.columnName}!=${primaryKey.columnName})
             <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">`${column.columnName}`,</if>
-        #end
-    #end
+#end
+#end
         </trim>
         )values(
         <trim suffixOverrides=",">
-    #foreach($column in $columns)
-        #if (${column.columnName}!=${primaryKey.columnName})
+#foreach($column in $columns)
+#if (${column.columnName}!=${primaryKey.columnName})
             <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">#{${column.camelName}},</if>
-        #end
-    #end
+#end
+#end
         </trim>
         )
     </insert>
@@ -58,11 +58,11 @@
     <update id="update" parameterType="${table.xCamelName}">
         update ${tableName} set
         <trim suffixOverrides=",">
-        #foreach($column in $columns)
-        #if (${column.columnName}!=${primaryKey.columnName})
+#foreach($column in $columns)
+#if (${column.columnName}!=${primaryKey.columnName})
             <if test="${column.camelName} != null #if(${column.javaType}=="String") and ${column.camelName} != ''#end">`${column.columnName}`=#{${column.camelName}},</if>
-        #end
-        #end
+#end
+#end
         </trim>
         where id=#{id}
     </update>

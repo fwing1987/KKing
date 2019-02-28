@@ -71,6 +71,7 @@
             treeNodeLabelProp="name"
             treeNodeFilterProp="id"
             @select="parentMenuTreeSelect"
+            :disabled="menuParams.type == 'B' && editType == 'update'"
             v-decorator="['pMenu', { rules: [{ required: false }] }]"
           >
           </a-tree-select>
@@ -150,7 +151,7 @@ export default {
       this.parentMenuTreeSelected = extra.selectedNodes[0].data.props
     },
     getMenuById (data, id) {
-      if (!id) return null
+      if (id === null) return null
       for (var i = 0; i < data.length; i++) {
         if (data[i].id === id) {
           return data[i]
@@ -178,7 +179,7 @@ export default {
     },
     addMenuClick () {
       if (this.tableSelected.type === 'B') {
-        this.$error('按钮下不能创建子项', 5)
+        this.$error({ title:  '按钮下不能创建子项' })
         return
       }
       this.editType = 'add'
@@ -229,7 +230,7 @@ export default {
               this.$message.success('删除成功', 5)
               this.getData()
             } else {
-              this.$error(`删除失败：${res.msg}`, 5)
+              this.$error({ title: `删除失败：${res.msg}` })
             }
           })
         }
@@ -247,11 +248,11 @@ export default {
       }
 
       if (parentType === 'M' && value !== 'B') {
-        cb(new Error('菜单下只能创建按钮'))
+        cb(new Error('菜单下只能包含按钮'))
       } else if (parentType === 'D' && value === 'B') {
-        cb(new Error('目录下不能创建按钮'))
+        cb(new Error('目录下不能包含按钮'))
       } else if (parentType === 'B') {
-        cb(new Error('按钮下不能创建子项'))
+        cb(new Error('按钮下不能包含子项'))
       }
       cb()
     },
@@ -265,17 +266,25 @@ export default {
                 this.$message.success('添加成功', 5)
                 this.getData()
               } else {
-                this.$error(`添加失败：${res.msg}`, 5)
+                this.$error({ title: `添加失败：${res.msg}` })
               }
             })
           } else if (this.editType === 'update') {
+            // 修改父菜单
+            if (this.parentMenuTreeSelected.id !== null) {
+              values.pid = this.parentMenuTreeSelected.id
+              if (values.pid === values.id) {
+                this.$error({ title: `父菜单不能是自身` })
+                return
+              }
+            }
             updateMenu(values).then(res => {
               if (!res.code) {
                 this.showMenuModal = false
                 this.$message.success('修改成功', 5)
                 this.getData()
               } else {
-                this.$error(`修改失败：${res.msg}`, 5)
+                this.$error({ title: `修改失败：${res.msg}` })
               }
             })
           }
@@ -288,19 +297,25 @@ export default {
         this.actions = res.data.actions.map(item => item.action_name)
         // 设置第一层级默认展开
         this.expandedRowKeys.push(..._.map(this.data, 'id'))
-        this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
-        this.modalTreeData[0].children = _.cloneDeep(this.data)
-        this.makeTreeDataSafe(this.modalTreeData)
+        if (this.modalTreeData.length <= 0) {
+          this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
+          this.modalTreeData[0].children = _.cloneDeep(this.data)
+          this.makeTreeDataSafe(this.modalTreeData)
+        }
       })
     },
     makeTreeDataSafe (data) {
       // 修改为antd控件需要的不同属性名
-      for (var i = 0; i < data.length; i++) {
-        data[i].title = data[i].name
-        data[i].key = data[i].id
-        data[i].value = data[i].name
-        if (data[i].children) {
-          this.makeTreeDataSafe(data[i].children)
+      for (var i = data.length - 1; i >= 0; i--) {
+        var item = data[i]
+        if (item.type === 'B') {
+          data.splice(i, 1)
+        }
+        item.title = item.name
+        item.key = item.id
+        item.value = item.name
+        if (item.children) {
+          this.makeTreeDataSafe(item.children)
         }
       }
     }

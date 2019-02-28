@@ -21,7 +21,7 @@ const err = (error) => {
       notification.error({ message: '没有权限', description: data.message })
     }
     if (error.response.status === 401) {
-      notification.error({ message: 'Unauthorized', description: 'Authorization verification failed' })
+      notification.error({ message: '未登录', description: '需要登录' })
       if (token) {
         store.dispatch('Logout').then(() => {
           setTimeout(() => {

@@ -14,9 +14,10 @@
         <result property="updateTime" column="update_time"/>
         <result property="state" column="state"/>
         <result property="avatar" column="avatar"/>
+        <result property="deptId" column="dept_id"/>
     </resultMap>
     <sql id="SelectOneSql" >
-        select <trim suffixOverrides=","> id,  user_name,  password,  nick,  salt,  create_time,  update_time,  state,  avatar, </trim>
+        select <trim suffixOverrides=","> id,  user_name,  password,  nick,  salt,  create_time,  update_time,  state,  avatar,  dept_id, </trim>
         from t_sys_user
     </sql>
     <select id="selectById" resultType="TSysUser" parameterType="Integer">
@@ -35,6 +36,7 @@
             <if test="updateTime != null "> and `update_time`=#{updateTime}</if>
             <if test="state != null "> and `state`=#{state}</if>
             <if test="avatar != null  and avatar != ''"> and `avatar`=#{avatar}</if>
+            <if test="deptId != null "> and `dept_id`=#{deptId}</if>
         </where>
     </select>
     <insert id="insert" parameterType="TSysUser" keyProperty="id" useGeneratedKeys="true">
@@ -48,6 +50,7 @@
             <if test="updateTime != null ">`update_time`,</if>
             <if test="state != null ">`state`,</if>
             <if test="avatar != null  and avatar != ''">`avatar`,</if>
+            <if test="deptId != null ">`dept_id`,</if>
         </trim>
         )values(
         <trim suffixOverrides=",">
@@ -59,6 +62,7 @@
             <if test="updateTime != null ">#{updateTime},</if>
             <if test="state != null ">#{state},</if>
             <if test="avatar != null  and avatar != ''">#{avatar},</if>
+            <if test="deptId != null ">#{deptId},</if>
         </trim>
         )
     </insert>
@@ -84,6 +88,7 @@
             <if test="updateTime != null ">`update_time`=#{updateTime},</if>
             <if test="state != null ">`state`=#{state},</if>
             <if test="avatar != null  and avatar != ''">`avatar`=#{avatar},</if>
+            <if test="deptId != null ">`dept_id`=#{deptId},</if>
         </trim>
         where id=#{id}
     </update>

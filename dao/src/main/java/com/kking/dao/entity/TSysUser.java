@@ -14,6 +14,7 @@ public class TSysUser extends BaseEntity{
     private Date updateTime;
     private Integer state;
     private String avatar;
+    private Integer deptId;
 
     private List<TSysRole> roleList;
 
@@ -91,6 +92,14 @@ public class TSysUser extends BaseEntity{
         this.avatar = avatar;
     }
 
+    public Integer getDeptId() {
+        return deptId;
+    }
+
+    public void setDeptId(Integer deptId) {
+        this.deptId = deptId;
+    }
+
     public List<TSysRole> getRoleList() {
         return roleList;
     }
@@ -114,6 +123,7 @@ public class TSysUser extends BaseEntity{
         sb.append(", updateTime=").append(updateTime);
         sb.append(", state=").append(state);
         sb.append(", avatar=").append(avatar);
+        sb.append(", deptId=").append(deptId);
         sb.append("]");
         return sb.toString();
     }

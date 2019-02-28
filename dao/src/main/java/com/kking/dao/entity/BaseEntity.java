@@ -9,7 +9,7 @@ public class BaseEntity implements Serializable {
     private Integer pageSize;
     private String beginTime;
     private String endTime;
-    private Map<String,String> params;
+    private Map<String,Object> params;
 
     public Integer getPageNo() {
         return pageNo;
@@ -43,14 +43,14 @@ public class BaseEntity implements Serializable {
         this.endTime = endTime;
     }
 
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         if(params == null){
             params = new HashMap<>();
         }
         return params;
     }
 
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 }

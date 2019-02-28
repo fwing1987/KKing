@@ -2,6 +2,7 @@ package com.kking.dao.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kking.common.utils.TreeUtil;
 import com.kking.dao.entity.TSysAction;
 import com.kking.dao.entity.TSysMenu;
 import com.kking.dao.entity.TSysPerm;
@@ -163,34 +164,12 @@ public class TSysMenuServiceImpl implements TSysMenuService {
     @Override
     public List<JSONObject> getUserMenu(TSysMenu tSysMenu) {
         List<TSysMenu> menuList = tSysMenuMapper.getUserMenu(tSysMenu);
-        return toTreeList(menuList);
+        return TreeUtil.toTreeList(menuList);
     }
 
     @Override
     public List<JSONObject> getTreeList(TSysMenu tSysMenu) {
         List<TSysMenu> menuList = tSysMenuMapper.getUserMenu(tSysMenu);
-        return toTreeList(menuList);
-    }
-
-    private List<JSONObject> toTreeList(List<TSysMenu> menuList){
-        int prePid = -1;
-        List<JSONObject> tmpList = new ArrayList<>();
-        Map<Integer,List> childMap = new HashMap<>();
-        for(TSysMenu menu : menuList){
-            JSONObject menuJSON = (JSONObject) JSON.toJSON(menu);
-
-            if(menu.getPid() != prePid && prePid != -1){
-                childMap.put(prePid,tmpList);
-                tmpList = new ArrayList<>();
-            }
-            if(childMap.containsKey(menu.getId())){
-                //菜单有子菜单，安装上
-                menuJSON.put("children",childMap.get(menu.getId()));
-            }
-            prePid = menu.getPid();
-            tmpList.add(menuJSON);
-        }
-
-        return tmpList;
+        return TreeUtil.toTreeList(menuList);
     }
 }

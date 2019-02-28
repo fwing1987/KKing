@@ -5,15 +5,15 @@
         <a-row :gutter="16" type="flex" justify="start">
           <a-col :span="6">
             <a-form-item label="名称：">
-              <a-input type="text" v-model="params.roleDesc"> </a-input>
+              <a-input type="text" v-model="params.name"> </a-input>
             </a-form-item>
           </a-col>
-          <a-col :span="6">
-            <a-form-item label="标识：">
-              <a-input type="text" v-model="params.roleName"> </a-input>
+          <a-col :span="7">
+            <a-form-item label="负责人：">
+              <a-input type="text" v-model="params.leader"> </a-input>
             </a-form-item>
           </a-col>
-          <a-col :span="6">
+          <a-col :span="5">
             <a-form-item label="类型：">
               <a-radio-group v-model="params.state">
                 <a-radio-button value="0">正常</a-radio-button>
@@ -21,7 +21,7 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="6">
+          <a-col :span="2">
             <a-form-item>
               <a-button type="primary" @click="getData"> <a-icon type="search"></a-icon>搜索 </a-button>
             </a-form-item>
@@ -34,90 +34,79 @@
         <a-button
           type="primary"
           :disabled="tableSelected.type && tableSelected.type === 'B'"
-          @click="addRoleClick"
+          @click="addClick"
           v-action:add
         >
           <a-icon type="plus" />新增
         </a-button>
-        <a-button type="primary" @click="editRoleClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-        <a-button type="danger" @click="deleteRoleClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+        <a-button type="primary" @click="editClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
+        <a-button type="danger" @click="deleteClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
       </a-button-group>
       <a-table
         style="margin-top:10px"
         :columns="header"
         :dataSource="data"
         rowKey="id"
+        :defaultExpandedRowKeys="expandedRowKeys"
         :rowSelection="rowSelection"
         :customRow="customRow"
         :pagination="false"
       ></a-table>
     </a-card>
 
-    <a-modal v-model="showMenuModal" destroyOnClose @ok="editPermssion" :confirmLoading="menuTree.menuModalLoading">
-      <a-row>
-        <a-col :span="12">
-          <a-card title="所有菜单">
-            <a-tree
-              :treeData="menuTree.menuData"
-              showIcon
-              defaultExpandAll
-              checkable
-              showLine
-              @check="checkTreeMenu"
-              :defaultCheckedKeys="menuTree.selectedTreeKeys"
-            />
-          </a-card>
-        </a-col>
-        <a-col :span="12">
-          <a-card title="已分配菜单">
-            <a-tree
-              :treeData="menuTree.selectedMenuData"
-              showIcon
-              defaultExpandAll
-            />
-          </a-card>
-        </a-col>
-      </a-row>
-    </a-modal>
-
-    <a-modal v-model="showRoleModal" title="角色修改" :maskClosable="false" @ok="editRole">
+    <a-modal v-model="showDeptModal" title="部门" :maskClosable="false" @ok="editDept">
       <a-form :form="form">
         <a-form-item v-show="false">
           <a-input type="hidden" v-decorator="['id']"></a-input>
         </a-form-item>
-
+        <a-form-item>
+          <a-input type="hidden" v-decorator="['pid']"></a-input>
+        </a-form-item>
         <a-form-item label="名称：" :label-col="labelCol" :wrapper-col="wrapperCol">
-          <a-input type="text" v-decorator="['roleDesc', { rules: [{ required: true, message: '请输入角色名' }] }]">
+          <a-input type="text" v-decorator="['name', { rules: [{ required: true, message: '请输入部门名' }] }]">
           </a-input>
         </a-form-item>
-        <a-form-item label="标识：" :label-col="labelCol" :wrapper-col="wrapperCol">
-          <a-input
-            type="text"
-            v-decorator="['roleName', { rules: [{ required: true, message: '请输入标识名' }] }]"
-          >
-          </a-input>
+        <a-form-item label="父部门：" :label-col="labelCol" :wrapper-col="wrapperCol" >
+          <a-tree-select
+            style="width:100%"
+            :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
+            :treeData="modalTreeData"
+            :treeDefaultExpandedKeys="expandedRowKeys"
+            @select="parentMenuTreeSelect"
+            treeNodeLabelProp="name"
+            treeNodeFilterProp="id"
+            :disabled="modalParams.pid===0"
+            v-decorator="['parrentName', { rules: [{ required: false, message: '请选择父部门' }] }]"
+          />
+        </a-form-item>
+        <a-form-item label="负责人：" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-input type="text" v-decorator="['leader']"/>
+        </a-form-item>
+        <a-form-item label="联系电话：" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-input type="text" v-decorator="['phone']"/>
+        </a-form-item>
+        <a-form-item label="邮箱：" :label-col="labelCol" :wrapper-col="wrapperCol">
+          <a-input type="text" v-decorator="['mail']"/>
         </a-form-item>
         <a-form-item label="状态：" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-switch
             v-decorator="['state', { valuePropName: 'checked' }]"
-          >
-          </a-switch>
+          />
         </a-form-item>
       </a-form>
     </a-modal>
   </div>
 </template>
 <script>
-import { getRoleList, addRole, updateRole, deleteRole, editRolePermssion } from '@/api/role'
-import { getMenuList } from '@/api/menu'
+import { getDeptList, addDept, updateDept, deleteDept } from '@/api/dept'
 
 export default {
   methods: {
     makeSelectedMenuData (data, selectedKeys, e) {
       // 选出已选择的菜单
       var ret = null
+      var childRet
       for (var i = 0; i < data.length; i++) {
-        var childRet = null
         if (data[i].children) {
           childRet = this.makeSelectedMenuData(data[i].children, selectedKeys, e)
         }
@@ -135,10 +124,10 @@ export default {
         }
         if (data[i].actionName && e) {
           // 将有变化的节点变色突出展示
-          if (selectedKeys.indexOf(data[i].id) >= 0 && !data[i].roleId ||
-               selectedKeys.indexOf(data[i].id) < 0 && data[i].roleId) {
+          if (selectedKeys.indexOf(data[i].id) >= 0 && !data[i].deptId ||
+               selectedKeys.indexOf(data[i].id) < 0 && data[i].deptId) {
             data[i].class = 'tree-selected-node'
-            this.menuTree.changeMenuData.push({ permId: data[i].permId, new: !data[i].roleId })
+            this.menuTree.changeMenuData.push({ permId: data[i].permId, new: !data[i].deptId })
           } else {
             data[i].class = ''
           }
@@ -166,38 +155,69 @@ export default {
         }
       }
     },
-    initRoleParams () {
-      this.menuParams = {
+    parentMenuTreeSelect (value, node, extra) {
+      // 部门树父节点点击选中，记录父节点
+      this.parentMenuTreeSelected = extra.selectedNodes[0].data.props
+    },
+    initDeptParams () {
+      this.modalParams = {
         state: 1,
-        roleDesc: '',
-        roleName: ''
+        leader: '',
+        phone: '',
+        mail: '',
+        name: ''
       }
     },
-    addRoleClick () {
-      this.editType = 'add'
-      this.initRoleParams()
-      this.showRoleModal = true
+    getItemById (data, id) {
+      if (!id) return null
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].id === id) {
+          return data[i]
+        }
+        if (data[i].children) {
+          var ret = null
+          if ((ret = this.getItemById(data[i].children, id))) {
+            return ret
+          }
+        }
+      }
     },
-    editRoleClick () {
+    addClick () {
+      this.editType = 'add'
+      this.initDeptParams()
+      if (this.tableSelected.name) {
+        this.modalParams.parrentName = this.tableSelected.name
+        this.modalParams.pid = this.tableSelected.id
+      } else if (this.modalTreeData[0].name) {
+        this.modalParams.parrentName = this.modalTreeData[0].name
+        this.modalParams.pid = this.modalTreeData[0].id
+      }
+      this.showDeptModal = true
+    },
+    editClick () {
       if (!this.tableSelected.id) {
-        this.$message.warning('请选择要修改的角色项', 5)
+        this.$message.warning('请选择要修改的部门项', 5)
         return
       }
       this.editType = 'update'
-      this.initRoleParams()
-      _.merge(this.menuParams, this.tableSelected)
-      this.menuParams.state = !this.menuParams.state
-      this.showRoleModal = true
+      this.initDeptParams()
+      _.merge(this.modalParams, this.tableSelected)
+      var parent = this.getItemById(this.modalTreeData, this.modalParams.pid)
+      if (parent) {
+        this.modalParams.parrentName = parent.name
+      }
+      this.modalParams.state = !this.modalParams.state
+      this.showDeptModal = true
     },
-    deleteRoleClick () {
+    deleteClick () {
       if (!this.tableSelected.id) {
-        this.$message.warning('请选择要删除的角色项', 5)
+        this.$message.warning('请选择要删除的部门项', 5)
         return
       }
       this.$confirm({
-        title: `确认删除角色【${this.tableSelected.roleDesc}】吗？`,
+        title: `确认删除部门【${this.tableSelected.name}】吗？`,
         onOk: () => {
-          deleteRole(this.tableSelected.id).then(res => {
+          deleteDept(this.tableSelected.id).then(res => {
             if (!res.code) {
               this.tableSelected = {}
               this.$message.success('删除成功', 5)
@@ -209,14 +229,14 @@ export default {
         }
       })
     },
-    editRole () {
+    editDept () {
       this.form.validateFields((err, values) => {
         if (!err) {
           values.state = !values.state
           if (this.editType === 'add') {
-            addRole(values).then(res => {
+            addDept(values).then(res => {
               if (!res.code) {
-                this.showRoleModal = false
+                this.showDeptModal = false
                 this.$message.success('添加成功', 5)
                 this.getData()
               } else {
@@ -224,9 +244,17 @@ export default {
               }
             })
           } else if (this.editType === 'update') {
-            updateRole(values).then(res => {
+            // 修改父节点
+            if (this.parentMenuTreeSelected.id !== null) {
+              values.pid = this.parentMenuTreeSelected.id
+              if (values.pid === values.id) {
+                this.$error({ title: `父部门不能是自身` })
+                return
+              }
+            }
+            updateDept(values).then(res => {
               if (!res.code) {
-                this.showRoleModal = false
+                this.showDeptModal = false
                 this.$message.success('修改成功', 5)
                 this.getData()
               } else {
@@ -237,58 +265,42 @@ export default {
         }
       })
     },
-    editPermssion () {
-      if (!this.tableSelected.id) {
-        this.$error({ title: `请选择要修改的角色` })
-        return
-      } else if (this.menuTree.changeMenuData.length === 0) {
-        this.showMenuModal = false
-        return
-      }
-      this.menuTree.menuModalLoading = true
-      var params = {
-        'permList': this.menuTree.changeMenuData,
-        id: this.tableSelected.id
-      }
-      editRolePermssion(params).then(res => {
-        this.menuTree.menuModalLoading = false
-        if (!res.code) {
-          this.showMenuModal = false
-          this.$message.success('修改权限成功', 5)
-        } else {
-          this.$error({ title: `修改权限失败：${res.msg}` })
-        }
-      })
-    },
     getData () {
-      getRoleList(this.params).then(res => {
-        this.data = res.data.map(item => {
-          item.checked = item.state === 0// 正常状态state==0转换为开关状态1
-          return item
-        })
+      getDeptList(this.params).then(res => {
+        this.data = res.data
+        // 设置第一层级默认展开
+        this.expandedRowKeys.push(..._.map(this.data, 'id'))
+        if (this.modalTreeData.length <= 0) {
+          this.modalTreeData = _.cloneDeep(this.data)
+          this.makeTreeDataSafe(this.data)
+          this.makeTreeDataSafe(this.modalTreeData)
+        }
       })
     },
     makeTreeDataSafe (data) {
       // 修改为antd控件需要的不同属性名
       for (var i = 0; i < data.length; i++) {
-        data[i].title = data[i].name
-        data[i].key = data[i].id
-        if (data[i].icon) {
-          data[i].icon = (<a-icon type={data[i].icon} />)
+        var item = data[i]
+        item.title = item.name
+        item.key = item.id
+        item.value = item.name
+        item.checked = item.state === 0// 正常状态state==0转换为开关状态1
+        if (item.icon) {
+          item.icon = (<a-icon type={item.icon} />)
         }
-        if (data[i].children) {
-          this.makeTreeDataSafe(data[i].children)
+        if (item.children) {
+          this.makeTreeDataSafe(item.children)
         }
       }
     },
-    roleStateChange (checked, row) {
-      // 修改角色状态
+    deptStateChange (checked, row) {
+      // 修改部门状态
       row.state = !checked
       var msg = checked ? '启用' : '停用'
       this.$confirm({
-        title: `确认要${msg}角色【${row.roleDesc}】吗？`,
+        title: `确认要${msg}部门【${row.name}】吗？`,
         onOk: () => {
-          updateRole(row).then(res => {
+          updateDept(row).then(res => {
             if (!res.code) {
               this.$message.success('修改成功', 5)
               this.getData()
@@ -300,12 +312,12 @@ export default {
       })
     },
     getSelectedTreeKeys (data) {
-      // 获取角色菜单初始选择信息
+      // 获取部门菜单初始选择信息
       for (var i = 0; i < data.length; i++) {
         if (data[i].children) {
           this.getSelectedTreeKeys(data[i].children)
         } else {
-          if (data[i].roleId) {
+          if (data[i].deptId) {
             this.menuTree.selectedTreeKeys.push(data[i].id)
           }
         }
@@ -321,7 +333,7 @@ export default {
         // 设置成{}才会默认展开，[]默认全部收起，奇怪？？
         this.menuTree.menuData = {}
         this.menuTree.selectedTreeKeys = {}
-        getMenuList({ roleId: this.tableSelected.id }).then(res => {
+        getMenuList({ deptId: this.tableSelected.id }).then(res => {
           this.menuTree.menuData = res.data.menus
           this.menuTree.selectedTreeKeys = []
           this.getSelectedTreeKeys(this.menuTree.menuData)
@@ -330,10 +342,10 @@ export default {
         })
       }
     },
-    showRoleModal (newVal) {
+    showDeptModal (newVal) {
       if (newVal) {
         this.$nextTick(() => {
-          this.form.setFieldsValue(this.menuParams)
+          this.form.setFieldsValue(this.modalParams)
         })
       }
     }
@@ -347,6 +359,8 @@ export default {
         changeMenuData: [], // 权限选择变化过的节点
         menuModalLoading: false // 修改权限弹出框，确认按钮loading
       },
+      expandedRowKeys: [],
+      parentMenuTreeSelected: [],
       labelCol: {
         xs: { span: 5 }
       },
@@ -360,16 +374,20 @@ export default {
       },
       header: [
         {
-          title: '角色编号',
-          dataIndex: 'id'
-        },
-        {
           title: '名称',
-          dataIndex: 'roleDesc'
+          dataIndex: 'name'
         },
         {
-          title: '标识',
-          dataIndex: 'roleName'
+          title: '负责人',
+          dataIndex: 'leader'
+        },
+        {
+          title: '手机',
+          dataIndex: 'phone'
+        },
+        {
+          title: '邮箱',
+          dataIndex: 'mail'
         },
         {
           title: '状态',
@@ -378,7 +396,7 @@ export default {
             return (
               <div>
                 {this.$hasAction('edit') ? (
-                  <a-switch checked={row.checked} onChange={(checked) => { this.roleStateChange(checked, row) }}/>
+                  <a-switch checked={row.checked} onChange={(checked) => { this.deptStateChange(checked, row) }}/>
                 ) : (
                   <div>{state === 0 ? <a-tag color="cyan">正常</a-tag> : <a-tag color="red">禁用</a-tag>}</div>
                 )}
@@ -397,48 +415,49 @@ export default {
             return (
               <div>
                 <a-button-group>
-                  {this.$hasAction('edit') ? (
-                    <a-button
-                      type="primary"
-                      size="small"
-                      icon="edit"
-                      onClick={() => {
-                        this.tableSelected = row
-                        this.editRoleClick()
-                      }}
-                    >
-                    修改
-                    </a-button>
+                  {this.$hasAction('add') ? (
+                    <a-tooltip title="新增">
+                      <a-button
+                        style={{ visibility: row.type === 'B' ? 'hidden' : '' }}
+                        type="primary"
+                        size="small"
+                        icon="plus"
+                        onClick={() => {
+                          this.tableSelected = row
+                          this.addClick()
+                        }}
+                      />
+                    </a-tooltip>
                   ) : (
                     ''
                   )}
                   {this.$hasAction('edit') ? (
-                    <a-button
-                      type="primary"
-                      size="small"
-                      icon="solution"
-                      onClick={() => {
-                        this.tableSelected = row
-                        this.showMenuModal = true
-                      }}
-                    >
-                    权限分配
-                    </a-button>
+                    <a-tooltip title="修改">
+                      <a-button
+                        type="primary"
+                        size="small"
+                        icon="edit"
+                        onClick={() => {
+                          this.tableSelected = row
+                          this.editClick()
+                        }}
+                      />
+                    </a-tooltip>
                   ) : (
                     ''
                   )}
                   {this.$hasAction('remove') ? (
-                    <a-button
-                      type="danger"
-                      size="small"
-                      icon="delete"
-                      onClick={() => {
-                        this.tableSelected = row
-                        this.deleteRoleClick()
-                      }}
-                    >
-                    删除
-                    </a-button>
+                    <a-tooltip title="修改">
+                      <a-button
+                        type="danger"
+                        size="small"
+                        icon="delete"
+                        onClick={() => {
+                          this.tableSelected = row
+                          this.deleteClick()
+                        }}
+                      />
+                    </a-tooltip>
                   ) : (
                     ''
                   )}
@@ -449,15 +468,16 @@ export default {
         }
       ],
       data: [],
+      modalTreeData: [],
       params: {
         name: '',
         type: ''
       },
-      menuParams: {
+      modalParams: {
         type: 'M'
       },
       showMenuModal: false,
-      showRoleModal: false,
+      showDeptModal: false,
       tableSelected: {},
       editType: ''
     }

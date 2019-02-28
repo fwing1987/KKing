@@ -25,28 +25,30 @@
       </a-form>
     </a-card>
     <a-card hoverable>
-      <a-button-group>
-        <a-button
-          type="primary"
-          :disabled="tableSelected.type && tableSelected.type === 'B'"
-          @click="addMenuClick"
-          v-action:add
-        >
-          <a-icon type="plus" />新增
-        </a-button>
-        <a-button type="primary" @click="editMenuClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-        <a-button type="danger" @click="deleteMenuClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
-      </a-button-group>
-      <a-table
-        style="margin-top:10px"
-        :columns="header"
-        :dataSource="data"
-        rowKey="id"
-        :defaultExpandedRowKeys="expandedRowKeys"
-        :rowSelection="rowSelection"
-        :customRow="customRow"
-        :pagination="false"
-      ></a-table>
+      <a-spin tip="加载中，请稍候..." :spinning="loading">
+        <a-button-group>
+          <a-button
+            type="primary"
+            :disabled="tableSelected.type && tableSelected.type === 'B'"
+            @click="addMenuClick"
+            v-action:add
+          >
+            <a-icon type="plus" />新增
+          </a-button>
+          <a-button type="primary" @click="editMenuClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
+          <a-button type="danger" @click="deleteMenuClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+        </a-button-group>
+        <a-table
+          style="margin-top:10px"
+          :columns="header"
+          :dataSource="data"
+          rowKey="id"
+          :defaultExpandedRowKeys="expandedRowKeys"
+          :rowSelection="rowSelection"
+          :customRow="customRow"
+          :pagination="false"
+        />
+      </a-spin>
     </a-card>
 
     <a-modal v-model="showMenuModal" title="菜单" :maskClosable="false" @ok="editMenu">
@@ -70,34 +72,34 @@
             :treeDefaultExpandedKeys="expandedRowKeys"
             treeNodeLabelProp="name"
             treeNodeFilterProp="id"
-            @select="parentMenuTreeSelect"
-            :disabled="menuParams.type == 'B' && editType == 'update'"
+            @select="parentTreeSelect"
+            :disabled="modalParams.type == 'B' && editType == 'update'"
             v-decorator="['pMenu', { rules: [{ required: false }] }]"
           >
           </a-tree-select>
         </a-form-item>
-        <a-form-item label="路径：" v-show="menuParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-item label="路径：" v-show="modalParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input
             type="text"
-            v-decorator="['path', { rules: [{ required: menuParams.type != 'B', message: '请输入菜单路径' }] }]"
+            v-decorator="['path', { rules: [{ required: modalParams.type != 'B', message: '请输入菜单路径' }] }]"
           >
           </a-input>
         </a-form-item>
-        <a-form-item label="组件：" v-show="menuParams.type == 'M'" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-item label="组件：" v-show="modalParams.type == 'M'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input
             type="text"
-            v-decorator="['component', { rules: [{ required: menuParams.type == 'M', message: '请输入菜单组件' }] }]"
+            v-decorator="['component', { rules: [{ required: modalParams.type == 'M', message: '请输入菜单组件' }] }]"
           >
           </a-input>
         </a-form-item>
-        <a-form-item label="权限标识：" v-show="menuParams.type != 'D'" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-item label="权限标识：" v-show="modalParams.type != 'D'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input-group compact>
             <a-input
               type="text"
               v-decorator="['permName']"
               placeholder="资源名"
               style="width:50%"
-              :disabled="menuParams.type != 'M'"
+              :disabled="modalParams.type != 'M'"
             >
             </a-input>
             <a-auto-complete
@@ -108,7 +110,7 @@
             />
           </a-input-group>
         </a-form-item>
-        <a-form-item label="图标：" v-show="menuParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-item label="图标：" v-show="modalParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input type="text" v-decorator="['icon']"> </a-input>
         </a-form-item>
         <a-form-item label="排序：" :label-col="labelCol" :wrapper-col="wrapperCol">
@@ -118,7 +120,7 @@
           <a-radio-group
             buttonStyle="solid"
             :disabled="editType == 'update'"
-            v-model="menuParams.type"
+            v-model="modalParams.type"
             v-decorator="[
               'type',
               { rules: [{ required: true, message: '请选择菜单类型' }, { validator: makeMenuTypeSafe }] }
@@ -137,6 +139,15 @@
 import { getMenuList, addMenu, updateMenu, deleteMenu } from '@/api/menu'
 export default {
   methods: {
+    regetTreeData () {
+      if (this.modalTreeData.length <= 0) {
+        getMenuList({}).then(res => {
+          this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
+          this.modalTreeData[0].children = _.cloneDeep(res.data.menus)
+          this.makeTreeDataSafe(this.modalTreeData)
+        })
+      }
+    },
     customRow (record) {
       return {
         on: {
@@ -147,8 +158,8 @@ export default {
         }
       }
     },
-    parentMenuTreeSelect (value, node, extra) {
-      this.parentMenuTreeSelected = extra.selectedNodes[0].data.props
+    parentTreeSelect (value, node, extra) {
+      this.parentTreeSelected = extra.selectedNodes[0].data.props
     },
     getMenuById (data, id) {
       if (id === null) return null
@@ -165,7 +176,7 @@ export default {
       }
     },
     initMenuParams () {
-      this.menuParams = {
+      this.modalParams = {
         pMenu: '',
         pid: '',
         type: 'M',
@@ -184,16 +195,16 @@ export default {
       }
       this.editType = 'add'
       this.initMenuParams()
-      this.menuParams.pMenu = this.tableSelected.name ? this.tableSelected.name : '主菜单'
-      this.menuParams.pid = this.tableSelected.id ? this.tableSelected.id : 0
+      this.modalParams.pMenu = this.tableSelected.name ? this.tableSelected.name : '主菜单'
+      this.modalParams.pid = this.tableSelected.id ? this.tableSelected.id : 0
       if (this.tableSelected.type === 'M') {
-        this.menuParams.type = 'B'
+        this.modalParams.type = 'B'
       }
       var parentMenu = this.getMenuById(this.modalTreeData, this.tableSelected.pid)
-      if (this.tableSelected.type === 'B' && this.parentMenu.permName) {
-        this.menuParams.permName = this.parentMenu.permName
+      if (this.tableSelected.type === 'B' && parentMenu.permName) {
+        this.modalParams.permName = this.parentMenu.permName
       } else if(this.tableSelected.permName) {
-        this.menuParams.permName = this.tableSelected.permName
+        this.modalParams.permName = this.tableSelected.permName
       }
       
       this.showMenuModal = true
@@ -206,12 +217,12 @@ export default {
 
       this.editType = 'update'
       this.initMenuParams()
-      _.merge(this.menuParams, this.tableSelected)
-      var parentMenu = this.getMenuById(this.modalTreeData, this.menuParams.pid)
-      this.menuParams.pMenu = parentMenu.name
-      if (this.menuParams.type === 'B') {
+      _.merge(this.modalParams, this.tableSelected)
+      var parentMenu = this.getMenuById(this.modalTreeData, this.modalParams.pid)
+      this.modalParams.pMenu = parentMenu ? parentMenu.name : '主菜单'
+      if (this.modalParams.type === 'B') {
         // 按钮使用上级菜单资源名
-        this.menuParams.permName = parentMenu.permName
+        this.modalParams.permName = parentMenu.permName
       }
 
       this.showMenuModal = true
@@ -238,13 +249,13 @@ export default {
     },
     makeMenuTypeSafe (rule, value, cb) {
       var parentType = 'D'
-      if (this.parentMenuTreeSelected.type) {
+      if (this.parentTreeSelected.type) {
         // 用户自己选择父菜单
-        parentType = this.parentMenuTreeSelected.type
-      } else if (this.menuParams.pid) {
+        parentType = this.parentTreeSelected.type
+      } else if (this.modalParams.pid) {
         // 对话框刚打开时
-        var parentMenu = this.getMenuById(this.modalTreeData, this.menuParams.pid)
-        parentType = parentMenu.type
+        var parentMenu = this.getMenuById(this.modalTreeData, this.modalParams.pid)
+        parentType = parentMenu ? parentMenu.type : 'D';
       }
 
       if (parentType === 'M' && value !== 'B') {
@@ -271,18 +282,25 @@ export default {
             })
           } else if (this.editType === 'update') {
             // 修改父菜单
-            if (this.parentMenuTreeSelected.id !== null) {
-              values.pid = this.parentMenuTreeSelected.id
+            var isChangePid = false
+            if (this.parentTreeSelected.id !== null) {
+              values.pid = this.parentTreeSelected.id
               if (values.pid === values.id) {
                 this.$error({ title: `父菜单不能是自身` })
                 return
               }
+              isChangePid = true
             }
             updateMenu(values).then(res => {
               if (!res.code) {
                 this.showMenuModal = false
                 this.$message.success('修改成功', 5)
                 this.getData()
+                if (isChangePid) {
+                  // 更新下树结构
+                  this.modalTreeData = []
+                  this.regetTreeData()
+                }
               } else {
                 this.$error({ title: `修改失败：${res.msg}` })
               }
@@ -292,12 +310,14 @@ export default {
       })
     },
     getData () {
+      this.loading = true
       getMenuList(this.params).then(res => {
+        this.loading = false
         this.data = res.data.menus
         this.actions = res.data.actions.map(item => item.action_name)
         // 设置第一层级默认展开
         this.expandedRowKeys.push(..._.map(this.data, 'id'))
-        if (this.modalTreeData.length <= 0) {
+        if (Object.keys(this.params).length == 0 && this.modalTreeData.length <= 0) {
           this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
           this.modalTreeData[0].children = _.cloneDeep(this.data)
           this.makeTreeDataSafe(this.modalTreeData)
@@ -326,16 +346,17 @@ export default {
   watch: {
     showMenuModal (newVal) {
       if (newVal) {
-        this.parentMenuTreeSelected = {}
+        this.parentTreeSelected = {}
         this.$nextTick(() => {
-          this.form.setFieldsValue(this.menuParams)
+          this.form.setFieldsValue(this.modalParams)
         })
       }
     }
   },
   data () {
     return {
-      parentMenuTreeSelected: {},
+      loading: false,
+      parentTreeSelected: {},
       labelCol: {
         xs: { span: 5 }
       },
@@ -471,11 +492,8 @@ export default {
       data: [],
       modalTreeData: [],
       actions: [],
-      params: {
-        name: '',
-        type: ''
-      },
-      menuParams: {
+      params: {},
+      modalParams: {
         type: 'M'
       },
       showMenuModal: false,

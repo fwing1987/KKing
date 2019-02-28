@@ -30,27 +30,29 @@
       </a-form>
     </a-card>
     <a-card hoverable>
-      <a-button-group>
-        <a-button
-          type="primary"
-          :disabled="tableSelected.type && tableSelected.type === 'B'"
-          @click="addRoleClick"
-          v-action:add
-        >
-          <a-icon type="plus" />新增
-        </a-button>
-        <a-button type="primary" @click="editRoleClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-        <a-button type="danger" @click="deleteRoleClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
-      </a-button-group>
-      <a-table
-        style="margin-top:10px"
-        :columns="header"
-        :dataSource="data"
-        rowKey="id"
-        :rowSelection="rowSelection"
-        :customRow="customRow"
-        :pagination="false"
-      ></a-table>
+      <a-spin tip="加载中，请稍候..." :spinning="loading">
+        <a-button-group>
+          <a-button
+            type="primary"
+            :disabled="tableSelected.type && tableSelected.type === 'B'"
+            @click="addRoleClick"
+            v-action:add
+          >
+            <a-icon type="plus" />新增
+          </a-button>
+          <a-button type="primary" @click="editRoleClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
+          <a-button type="danger" @click="deleteRoleClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+        </a-button-group>
+        <a-table
+          style="margin-top:10px"
+          :columns="header"
+          :dataSource="data"
+          rowKey="id"
+          :rowSelection="rowSelection"
+          :customRow="customRow"
+          :pagination="false"
+        />
+      </a-spin>
     </a-card>
 
     <a-modal v-model="showMenuModal" destroyOnClose @ok="editPermssion" :confirmLoading="menuTree.menuModalLoading">
@@ -167,7 +169,7 @@ export default {
       }
     },
     initRoleParams () {
-      this.menuParams = {
+      this.modalParams = {
         state: 1,
         roleDesc: '',
         roleName: ''
@@ -185,8 +187,8 @@ export default {
       }
       this.editType = 'update'
       this.initRoleParams()
-      _.merge(this.menuParams, this.tableSelected)
-      this.menuParams.state = !this.menuParams.state
+      _.merge(this.modalParams, this.tableSelected)
+      this.modalParams.state = !this.modalParams.state
       this.showRoleModal = true
     },
     deleteRoleClick () {
@@ -261,7 +263,9 @@ export default {
       })
     },
     getData () {
+      this.loading = true
       getRoleList(this.params).then(res => {
+        this.loading = false
         this.data = res.data.map(item => {
           item.checked = item.state === 0// 正常状态state==0转换为开关状态1
           return item
@@ -333,13 +337,14 @@ export default {
     showRoleModal (newVal) {
       if (newVal) {
         this.$nextTick(() => {
-          this.form.setFieldsValue(this.menuParams)
+          this.form.setFieldsValue(this.modalParams)
         })
       }
     }
   },
   data () {
     return {
+      loading: false,
       menuTree: {
         menuData: {},
         selectedMenuData: {},
@@ -453,7 +458,7 @@ export default {
         name: '',
         type: ''
       },
-      menuParams: {
+      modalParams: {
         type: 'M'
       },
       showMenuModal: false,

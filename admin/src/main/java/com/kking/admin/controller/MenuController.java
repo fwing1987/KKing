@@ -1,11 +1,11 @@
 package com.kking.admin.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kking.admin.dto.JsonResult;
+import com.kking.common.annotation.DataScope;
 import com.kking.dao.entity.TSysMenu;
-import com.kking.dao.entity.TSysPerm;
-import com.kking.dao.service.TSysActionService;
+import com.kking.dao.entity.TSysUser;
 import com.kking.dao.service.TSysMenuService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,26 +13,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/sys/menu")
 public class MenuController extends BaseController{
     @Autowired
     TSysMenuService menuService;
-    @Autowired
-    TSysActionService actionService;
 
     @RequiresPermissions("menu:list")
     @RequestMapping("list")
     public JsonResult list(@RequestBody TSysMenu menu){
-        JSONObject retJson = new JSONObject();
-        retJson.put("menus",menuService.getTreeList(menu));
+        return toJson(menuService.getUserMenu(menu));
+    }
 
-        List<Map<String,String>> actionList = actionService.getPermTypeAction(TSysPerm.PERM_TYPE.MENU);
-        retJson.put("actions",actionList);
-        return toJson(retJson);
+    @RequiresPermissions("menu:list")
+    @RequestMapping("listRole")
+    public JsonResult listWithRoleStatus(@RequestBody TSysMenu menu){
+        return toJson(menuService.getUserMenuWithRoleStatus(menu));
     }
 
     @RequiresPermissions("menu:add")
@@ -49,7 +45,7 @@ public class MenuController extends BaseController{
 
     @RequiresPermissions("menu:remove")
     @RequestMapping("delete")
-    public JsonResult delete(@RequestParam Integer id){
-        return toJson(menuService.deleteById(id));
+    public JsonResult delete(@RequestBody TSysMenu menu){
+        return toJson(menuService.deleteById(menu));
     }
 }

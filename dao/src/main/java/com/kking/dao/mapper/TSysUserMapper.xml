@@ -68,13 +68,13 @@
     </insert>
     <select id="selectOneByProperty" resultType="TSysUser">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
     <select id="selectListByProperty" resultType="TSysUser">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
-    <delete id="deleteById" parameterType="Integer">
+    <delete id="deleteById" parameterType="TSysUser">
         delete from t_sys_user where id=#{id}
     </delete>
     <update id="update" parameterType="TSysUser">
@@ -92,5 +92,12 @@
         </trim>
         where id=#{id}
     </update>
-
+    <select id="checkUserRoleEditPermission" resultType="int">
+        select count(1)
+        from t_sys_user_role ur,t_sys_role_perm rp,t_sys_perm p,t_sys_perm p2,t_sys_role_perm rp2
+        where rp.role_id=ur.role_id and p.id=rp.perm_id
+        and p.resource_id=p2.resource_id and p2.id=rp2.perm_id
+        and p.perm_type='DEPT' and p2.perm_type='DEPT'
+        and ur.user_id=#{param1} and rp2.role_id=#{param2}
+    </select>
 </mapper>

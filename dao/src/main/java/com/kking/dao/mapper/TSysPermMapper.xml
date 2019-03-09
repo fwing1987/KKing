@@ -9,11 +9,10 @@
         <result property="createTime" column="create_time"/>
         <result property="resourceId" column="resource_id"/>
         <result property="permName" column="perm_name"/>
-        <result property="actionId" column="action_id"/>
         <result property="permType" column="perm_type"/>
     </resultMap>
     <sql id="SelectOneSql" >
-        select <trim suffixOverrides=","> id,  create_time,  resource_id,  perm_name,  action_id,  perm_type, </trim>
+        select <trim suffixOverrides=","> id,  create_time,  resource_id,  perm_name,  perm_type, </trim>
         from t_sys_perm
     </sql>
     <select id="selectById" resultType="TSysPerm" parameterType="Integer">
@@ -27,7 +26,6 @@
             <if test="createTime != null "> and `create_time`=#{createTime}</if>
             <if test="resourceId != null "> and `resource_id`=#{resourceId}</if>
             <if test="permName != null  and permName != ''"> and `perm_name`=#{permName}</if>
-            <if test="actionId != null "> and `action_id`=#{actionId}</if>
             <if test="permType != null  and permType != ''"> and `perm_type`=#{permType}</if>
         </where>
     </select>
@@ -37,7 +35,6 @@
             <if test="createTime != null ">`create_time`,</if>
             <if test="resourceId != null ">`resource_id`,</if>
             <if test="permName != null  and permName != ''">`perm_name`,</if>
-            <if test="actionId != null ">`action_id`,</if>
             <if test="permType != null  and permType != ''">`perm_type`,</if>
         </trim>
         )values(
@@ -45,20 +42,19 @@
             <if test="createTime != null ">#{createTime},</if>
             <if test="resourceId != null ">#{resourceId},</if>
             <if test="permName != null  and permName != ''">#{permName},</if>
-            <if test="actionId != null ">#{actionId},</if>
             <if test="permType != null  and permType != ''">#{permType},</if>
         </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysPerm">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
     <select id="selectListByProperty" resultType="TSysPerm">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
-    <delete id="deleteById" parameterType="Integer">
+    <delete id="deleteById" parameterType="TSysPerm">
         delete from t_sys_perm where id=#{id}
     </delete>
     <update id="update" parameterType="TSysPerm">
@@ -67,7 +63,6 @@
             <if test="createTime != null ">`create_time`=#{createTime},</if>
             <if test="resourceId != null ">`resource_id`=#{resourceId},</if>
             <if test="permName != null  and permName != ''">`perm_name`=#{permName},</if>
-            <if test="actionId != null ">`action_id`=#{actionId},</if>
             <if test="permType != null  and permType != ''">`perm_type`=#{permType},</if>
         </trim>
         where id=#{id}

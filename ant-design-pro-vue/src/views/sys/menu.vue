@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-card style="margin-bottom:10px" v-action:list>
+    <a-card style="margin-bottom:10px" v-perm:menu:list>
       <a-form layout="inline">
         <a-row :gutter="16" type="flex" justify="start">
           <a-col :span="6">
@@ -31,12 +31,12 @@
             type="primary"
             :disabled="tableSelected.type && tableSelected.type === 'B'"
             @click="addMenuClick"
-            v-action:add
+            v-perm:menu:add
           >
             <a-icon type="plus" />新增
           </a-button>
-          <a-button type="primary" @click="editMenuClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-          <a-button type="danger" @click="deleteMenuClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+          <a-button type="primary" @click="editMenuClick" v-perm:menu:edit> <a-icon type="edit" />修改 </a-button>
+          <a-button type="danger" @click="deleteMenuClick" v-perm:menu:remove> <a-icon type="delete" />删除 </a-button>
         </a-button-group>
         <a-table
           style="margin-top:10px"
@@ -93,22 +93,11 @@
           </a-input>
         </a-form-item>
         <a-form-item label="权限标识：" v-show="modalParams.type != 'D'" :label-col="labelCol" :wrapper-col="wrapperCol">
-          <a-input-group compact>
-            <a-input
-              type="text"
-              v-decorator="['permName']"
-              placeholder="资源名"
-              style="width:50%"
-              :disabled="modalParams.type != 'M'"
-            >
-            </a-input>
-            <a-auto-complete
-              style="width:50%"
-              v-decorator="['actionName']"
-              :dataSource="actions"
-              placeholder="操作名"
-            />
-          </a-input-group>
+          <a-input
+            type="text"
+            v-decorator="['permName']"
+            placeholder="权限标识"
+          />
         </a-form-item>
         <a-form-item label="图标：" v-show="modalParams.type != 'B'" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-input type="text" v-decorator="['icon']"> </a-input>
@@ -143,7 +132,7 @@ export default {
       if (this.modalTreeData.length <= 0) {
         getMenuList({}).then(res => {
           this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
-          this.modalTreeData[0].children = _.cloneDeep(res.data.menus)
+          this.modalTreeData[0].children = res.data
           this.makeTreeDataSafe(this.modalTreeData)
         })
       }
@@ -184,13 +173,12 @@ export default {
         name: '',
         path: '',
         component: '',
-        actionName: '',
         icon: ''
       }
     },
     addMenuClick () {
       if (this.tableSelected.type === 'B') {
-        this.$error({ title:  '按钮下不能创建子项' })
+        this.$error({ title: '按钮下不能创建子项' })
         return
       }
       this.editType = 'add'
@@ -200,13 +188,6 @@ export default {
       if (this.tableSelected.type === 'M') {
         this.modalParams.type = 'B'
       }
-      var parentMenu = this.getMenuById(this.modalTreeData, this.tableSelected.pid)
-      if (this.tableSelected.type === 'B' && parentMenu.permName) {
-        this.modalParams.permName = this.parentMenu.permName
-      } else if(this.tableSelected.permName) {
-        this.modalParams.permName = this.tableSelected.permName
-      }
-      
       this.showMenuModal = true
     },
     editMenuClick () {
@@ -217,13 +198,10 @@ export default {
 
       this.editType = 'update'
       this.initMenuParams()
-      _.merge(this.modalParams, this.tableSelected)
+      this.tableSelected = this.getMenuById(this.data, this.tableSelected.id)
+      Object.assign(this.modalParams, this.tableSelected)
       var parentMenu = this.getMenuById(this.modalTreeData, this.modalParams.pid)
-      this.modalParams.pMenu = parentMenu ? parentMenu.name : '主菜单'
-      if (this.modalParams.type === 'B') {
-        // 按钮使用上级菜单资源名
-        this.modalParams.permName = parentMenu.permName
-      }
+      this.modalParams.pMenu = parentMenu.name
 
       this.showMenuModal = true
     },
@@ -240,6 +218,7 @@ export default {
               this.tableSelected = {}
               this.$message.success('删除成功', 5)
               this.getData()
+              this.updateModalTreeIfNeed()
             } else {
               this.$error({ title: `删除失败：${res.msg}` })
             }
@@ -255,7 +234,7 @@ export default {
       } else if (this.modalParams.pid) {
         // 对话框刚打开时
         var parentMenu = this.getMenuById(this.modalTreeData, this.modalParams.pid)
-        parentType = parentMenu ? parentMenu.type : 'D';
+        parentType = parentMenu ? parentMenu.type : 'D'
       }
 
       if (parentType === 'M' && value !== 'B') {
@@ -267,6 +246,12 @@ export default {
       }
       cb()
     },
+    updateModalTreeIfNeed () {
+      if (Object.keys(this.params).length === 0) {
+        this.modalTreeData = []
+        this.regetTreeData()
+      }
+    },
     editMenu () {
       this.form.validateFields((err, values) => {
         if (!err) {
@@ -276,30 +261,28 @@ export default {
                 this.showMenuModal = false
                 this.$message.success('添加成功', 5)
                 this.getData()
+                this.updateModalTreeIfNeed()
               } else {
                 this.$error({ title: `添加失败：${res.msg}` })
               }
             })
           } else if (this.editType === 'update') {
             // 修改父菜单
-            var isChangePid = false
-            if (this.parentTreeSelected.id !== null) {
+            if (this.parentTreeSelected.id) {
               values.pid = this.parentTreeSelected.id
               if (values.pid === values.id) {
                 this.$error({ title: `父菜单不能是自身` })
                 return
               }
-              isChangePid = true
             }
             updateMenu(values).then(res => {
               if (!res.code) {
                 this.showMenuModal = false
                 this.$message.success('修改成功', 5)
                 this.getData()
-                if (isChangePid) {
+                if (this.parentTreeSelected.id) {
                   // 更新下树结构
-                  this.modalTreeData = []
-                  this.regetTreeData()
+                  this.updateModalTreeIfNeed()
                 }
               } else {
                 this.$error({ title: `修改失败：${res.msg}` })
@@ -313,13 +296,12 @@ export default {
       this.loading = true
       getMenuList(this.params).then(res => {
         this.loading = false
-        this.data = res.data.menus
-        this.actions = res.data.actions.map(item => item.action_name)
+        this.data = res.data
         // 设置第一层级默认展开
-        this.expandedRowKeys.push(..._.map(this.data, 'id'))
-        if (Object.keys(this.params).length == 0 && this.modalTreeData.length <= 0) {
+        this.expandedRowKeys.push(...this.data.map(item => item.id))
+        if (Object.keys(this.params).length === 0 && this.modalTreeData.length <= 0) {
           this.modalTreeData = [{ id: 0, name: '主菜单', type: 'D' }]
-          this.modalTreeData[0].children = _.cloneDeep(this.data)
+          this.modalTreeData[0].children = JSON.parse(JSON.stringify(this.data))
           this.makeTreeDataSafe(this.modalTreeData)
         }
       })
@@ -398,10 +380,7 @@ export default {
         },
         {
           title: '权限标识',
-          dataIndex: 'permName',
-          customRender: (value, row, index) => {
-            return <span>{row.permName ? row.permName + ':' + row.actionName : ''}</span>
-          }
+          dataIndex: 'permName'
         },
         {
           title: '类型',
@@ -437,7 +416,7 @@ export default {
             return (
               <div>
                 <a-button-group>
-                  {this.$hasAction('add') ? (
+                  {this.$hasPerm('menu:add') ? (
                     <a-tooltip title="新增">
                       <a-button
                         style={{ visibility: row.type === 'B' ? 'hidden' : '' }}
@@ -453,7 +432,7 @@ export default {
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('edit') ? (
+                  {this.$hasPerm('menu:edit') ? (
                     <a-tooltip title="修改">
                       <a-button
                         type="primary"
@@ -468,7 +447,7 @@ export default {
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('remove') ? (
+                  {this.$hasPerm('menu:remove') ? (
                     <a-tooltip title="删除">
                       <a-button
                         type="danger"
@@ -491,7 +470,6 @@ export default {
       ],
       data: [],
       modalTreeData: [],
-      actions: [],
       params: {},
       modalParams: {
         type: 'M'

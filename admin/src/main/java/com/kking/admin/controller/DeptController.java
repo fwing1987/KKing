@@ -1,7 +1,11 @@
 package com.kking.admin.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kking.admin.dto.JsonResult;
+import com.kking.common.annotation.DataScope;
+import com.kking.common.utils.TreeUtil;
 import com.kking.dao.entity.TSysDept;
+import com.kking.dao.entity.TSysMenu;
 import com.kking.dao.entity.TSysUser;
 import com.kking.dao.service.TSysDeptService;
 import org.apache.shiro.SecurityUtils;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,11 +29,15 @@ public class DeptController extends BaseController{
     @RequiresPermissions("dept:list")
     @RequestMapping("list")
     public JsonResult list(@RequestBody TSysDept dept){
-        TSysUser user = (TSysUser)SecurityUtils.getSubject().getPrincipal();
-        Map<String,Object> params = new HashMap<>();
-        params.put("userId",user.getId());
-        dept.setParams(params);
-        return toJson(deptService.selectListWithUser(dept));
+        return toJson(TreeUtil.toTreeList(deptService.selectList(dept)));
+    }
+
+    @RequiresPermissions("dept:list")
+    @RequestMapping("listRole")
+    public JsonResult listWithRoleStatus(@RequestBody TSysDept dept){
+        List<JSONObject> deptList = TreeUtil.toTreeList(deptService.getDeptWithRoleStatus(dept));
+        TreeUtil.setChildrenRoleWithParent(deptList, null);
+        return toJson(deptList);
     }
 
     @RequiresPermissions("dept:add")
@@ -36,6 +45,7 @@ public class DeptController extends BaseController{
     public JsonResult add(@RequestBody TSysDept dept){
         return toJson(deptService.insert(dept));
     }
+
     @RequiresPermissions("dept:edit")
     @RequestMapping("update")
     public JsonResult update(@RequestBody TSysDept dept){
@@ -44,7 +54,7 @@ public class DeptController extends BaseController{
 
     @RequiresPermissions("dept:remove")
     @RequestMapping("delete")
-    public JsonResult delete(@RequestParam Integer id){
-        return toJson(deptService.deleteById(id));
+    public JsonResult delete(@RequestBody TSysDept dept){
+        return toJson(deptService.deleteById(dept));
     }
 }

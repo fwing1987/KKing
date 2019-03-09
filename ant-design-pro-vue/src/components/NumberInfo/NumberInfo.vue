@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import Icon from 'ant-design-vue/es/icon'
 
 export default {
   name: 'NumberInfo',
@@ -39,9 +38,6 @@ export default {
       type: String,
       default: 'up'
     }
-  },
-  components: {
-    Icon
   },
   data () {
     return {}

@@ -1,6 +1,4 @@
-import Menu from 'ant-design-vue/es/menu'
-import Icon from 'ant-design-vue/es/icon'
-
+const { Menu, Icon } = antd
 const { Item, SubMenu } = Menu
 
 export default {

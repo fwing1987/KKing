@@ -4,7 +4,6 @@ import store from './store'
 
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
-import notification from 'ant-design-vue/es/notification'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import { PageView } from '@/components/layouts'
 
@@ -15,14 +14,13 @@ const whiteList = ['login', 'register', 'registerResult'] // no redirect whiteli
 const makeRoutesSafe = (routes, deep) => {
   for (var index in routes) {
     var route = routes[index]
-    var meta = { title: route.name, icon: route.icon, permissionId: route.permName }
+    var meta = { title: route.name, icon: route.icon }
     route.meta = meta
     if (!route.path) {
       route.path = ''
     }
     if (route.children) {
       route.component = PageView
-      route.redirect = route.children[0].path
     } else {
       const componentPath = route.component
       route.component = () => import(`@/views/${componentPath}`)
@@ -45,7 +43,7 @@ router.beforeEach((to, from, next) => {
   if (Vue.ls.get(ACCESS_TOKEN)) {
     /* has token */
     if (to.path === '/user/login') {
-      next({ path: '/dashboard/workplace' })
+      next({ path: '/sys/menu' })
       NProgress.done()
     } else {
       if (!store.getters.nickname) {
@@ -78,7 +76,7 @@ router.beforeEach((to, from, next) => {
             // })
           })
           .catch((e) => {
-            notification.error({
+            Vue.prototype.$notification.error({
               message: '错误',
               description: '请求用户信息失败，请重试'
             })
@@ -108,45 +106,34 @@ router.afterEach(() => {
 /**
  * Action 权限指令
  * 指令用法：
- *  - 在需要控制 action 级别权限的组件上使用 v-action:[method] , 如下：
- *    <a-button v-action:add >添加用户</a-button>
- *    <a-button v-action:delete>删除用户</a-button>
- *    <a v-action:edit @click="edit(record)">修改</a>
+ *  - 在需要控制 action 级别权限的组件上使用 v-perm:[method] , 如下：
+ *    <a-button v-perm:add >添加用户</a-button>
+ *    <a-button v-perm:delete>删除用户</a-button>
+ *    <a v-perm:edit @click="edit(record)">修改</a>
  *  - jsx中请使用如下方式
- *    {this.$hasAction('add')?<a-button>添加用户</a-button>:''}
+ *    {this.$hasPerm('add')?<a-button>添加用户</a-button>:''}
  *
  *  - 当前用户没有权限时，组件上使用了该指令则会被隐藏
  *  - 当后台权限跟 pro 提供的模式不同时，只需要针对这里的权限过滤进行修改即可
  *
  *  @see https://github.com/sendya/ant-design-pro-vue/pull/53
  */
-function hasAction (actionName, permName) {
-  if (!permName && this && this.$route) {
-    permName = this.$route.meta.permissionId
-  }
-  if (!permName) return
-
+function hasPerm (permName) {
   const roles = store.getters.roles
-  const actions = []
-  roles.forEach(role => {
-    role.permList.forEach(p => {
-      if (p.permName !== permName) {
-        return
-      }
-      actions.push(...p.actionList)
-    })
+  var permList = []
+  roles.map(role => {
+    permList.push(...role.permissionList)
   })
-  return actions.indexOf(actionName) >= 0
+  return permList.indexOf(permName) >= 0
 }
 
-Vue.prototype.$hasAction = hasAction
+Vue.prototype.$hasPerm = hasPerm
 
-const action = Vue.directive('action', {
+const perm = Vue.directive('perm', {
   bind: function (el, binding, vnode) {
-    const actionName = binding.arg
-    const permissionId = vnode.context.$route.meta.permissionId
+    const permName = binding.arg
 
-    if (!hasAction(actionName, permissionId)) {
+    if (!hasPerm(permName)) {
       setTimeout(() => {
         if (el.parentNode == null) {
           el.style.display = 'none'
@@ -159,5 +146,5 @@ const action = Vue.directive('action', {
 })
 
 export {
-  action
+  perm
 }

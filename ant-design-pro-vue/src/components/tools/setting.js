@@ -1,4 +1,5 @@
-import { message } from 'ant-design-vue/es'
+import Vue from 'vue'
+const message = Vue.prototype.$message
 // import defaultSettings from '../defaultSettings';
 
 let lessNodesAppended

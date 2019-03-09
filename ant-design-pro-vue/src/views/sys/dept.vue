@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-card style="margin-bottom:10px">
+    <a-card style="margin-bottom:10px" v-perm:dept:list>
       <a-form layout="inline">
         <a-row :gutter="16" type="flex" justify="start">
           <a-col :span="6">
@@ -36,12 +36,12 @@
             type="primary"
             :disabled="tableSelected.type && tableSelected.type === 'B'"
             @click="addClick"
-            v-action:add
+            v-perm:dept:add
           >
             <a-icon type="plus" />新增
           </a-button>
-          <a-button type="primary" @click="editClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-          <a-button type="danger" @click="deleteClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+          <a-button type="primary" @click="editClick" v-perm:dept:edit> <a-icon type="edit" />修改 </a-button>
+          <a-button type="danger" @click="deleteClick" v-perm:dept:remove> <a-icon type="delete" />删除 </a-button>
         </a-button-group>
         <a-table
           style="margin-top:10px"
@@ -107,7 +107,7 @@ export default {
     regetTreeData () {
       if (this.modalTreeData.length <= 0) {
         getDeptList({}).then(res => {
-          this.modalTreeData = _.cloneDeep(res.data)
+          this.modalTreeData = res.data
           this.makeTreeDataSafe(this.modalTreeData)
         })
       }
@@ -169,7 +169,8 @@ export default {
       }
       this.editType = 'update'
       this.initDeptParams()
-      _.merge(this.modalParams, this.tableSelected)
+      this.tableSelected = this.getItemById(this.data, this.tableSelected.id)
+      Object.assign(this.modalParams, this.tableSelected)
       var parent = this.getItemById(this.modalTreeData, this.modalParams.pid)
       if (parent) {
         this.modalParams.parrentName = parent.name
@@ -190,12 +191,19 @@ export default {
               this.tableSelected = {}
               this.$message.success('删除成功', 5)
               this.getData()
+              this.updateModalTreeIfNeed()
             } else {
               this.$error({ title: `删除失败：${res.msg}` })
             }
           })
         }
       })
+    },
+    updateModalTreeIfNeed () {
+      if (Object.keys(this.params).length === 0) {
+        this.modalTreeData = []
+        this.regetTreeData()
+      }
     },
     editDept () {
       this.form.validateFields((err, values) => {
@@ -207,30 +215,28 @@ export default {
                 this.showDeptModal = false
                 this.$message.success('添加成功', 5)
                 this.getData()
+                this.updateModalTreeIfNeed()
               } else {
                 this.$error({ title: `添加失败：${res.msg}` })
               }
             })
           } else if (this.editType === 'update') {
             // 修改父节点
-            var isChangePid = false
-            if (this.parentTreeSelected.id !== null) {
+            if (this.parentTreeSelected.id) {
               values.pid = this.parentTreeSelected.id
               if (values.pid === values.id) {
                 this.$error({ title: `父部门不能是自身` })
                 return
               }
-              isChangePid = true
             }
             updateDept(values).then(res => {
               if (!res.code) {
                 this.showDeptModal = false
                 this.$message.success('修改成功', 5)
                 this.getData()
-                if (isChangePid) {
+                if (this.parentTreeSelected.id) {
                   // 更新下树结构
-                  this.modalTreeData = []
-                  this.regetTreeData()
+                  this.updateModalTreeIfNeed()
                 }
               } else {
                 this.$error({ title: `修改失败：${res.msg}` })
@@ -247,11 +253,12 @@ export default {
         this.loading = false
         this.data = res.data
         // 设置第一层级默认展开
-        this.expandedRowKeys.push(..._.map(this.data, 'id'))
+        this.expandedRowKeys.push(...this.data.map(item => item.id))
         this.makeTreeDataSafe(this.data)
         if (Object.keys(this.params).length === 0 && this.modalTreeData.length <= 0) {
-          this.modalTreeData = _.cloneDeep(this.data)
+          this.modalTreeData = JSON.parse(JSON.stringify(this.data))
         }
+        this.updateModalTreeIfNeed()
       })
     },
     makeTreeDataSafe (data) {
@@ -312,7 +319,7 @@ export default {
         menuModalLoading: false // 修改权限弹出框，确认按钮loading
       },
       expandedRowKeys: [],
-      parentTreeSelected: [],
+      parentTreeSelected: {},
       labelCol: {
         xs: { span: 5 }
       },
@@ -347,7 +354,7 @@ export default {
           customRender: (state, row, index) => {
             return (
               <div>
-                {this.$hasAction('edit') ? (
+                {this.$hasPerm('dept:edit') ? (
                   <a-switch checked={row.checked} onChange={(checked) => { this.deptStateChange(checked, row) }}/>
                 ) : (
                   <div>{state === 0 ? <a-tag color="cyan">正常</a-tag> : <a-tag color="red">禁用</a-tag>}</div>
@@ -367,7 +374,7 @@ export default {
             return (
               <div>
                 <a-button-group>
-                  {this.$hasAction('add') ? (
+                  {this.$hasPerm('dept:add') ? (
                     <a-tooltip title="新增">
                       <a-button
                         style={{ visibility: row.type === 'B' ? 'hidden' : '' }}
@@ -383,7 +390,7 @@ export default {
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('edit') ? (
+                  {this.$hasPerm('dept:edit') ? (
                     <a-tooltip title="修改">
                       <a-button
                         type="primary"
@@ -398,7 +405,7 @@ export default {
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('remove') ? (
+                  {this.$hasPerm('dept:remove') ? (
                     <a-tooltip title="修改">
                       <a-button
                         type="danger"

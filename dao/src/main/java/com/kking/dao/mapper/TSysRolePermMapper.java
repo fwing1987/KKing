@@ -9,8 +9,9 @@ public interface TSysRolePermMapper {
     public TSysRolePerm selectOneByProperty(String key, Object value);
     public List<TSysRolePerm> selectListByProperty(String key, Object value);
     public int insert(TSysRolePerm tSysRolePerm);
-    public int deleteById(Integer id);
+    public int deleteById(TSysRolePerm tSysRolePerm);
     public int update(TSysRolePerm tSysRolePerm);
 
     public int delete(TSysRolePerm rolePermCond);
+    public TSysRolePerm selectRolePermWithResourceAndRole(TSysRolePerm rolePermCond);
 }

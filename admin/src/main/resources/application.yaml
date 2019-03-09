@@ -1,12 +1,13 @@
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/sys?useUnicode=true&characterEncoding=utf8&useOldAliasMetadataBehavior=true&useTimezone=true&serverTimezone=GMT%2B8&useLegacyDatetimeCode=false
+    url: jdbc:mysql://127.0.0.1:3306/sys?useUnicode=true&characterEncoding=utf8&useOldAliasMetadataBehavior=true&useTimezone=true&serverTimezone=GMT%2B8&useLegacyDatetimeCode=false&allowMultiQueries=true
     username: root
     password: 123456
+#    username: sys
+#    password: sys@1234
   redis:
     host: localhost
     port: 6379
-
 # MyBatis
 mybatis:
   # 搜索指定包别名
@@ -18,4 +19,8 @@ mybatis:
 
 logging:
   level:
-    com.kking: trace
+    com.kking: debug
+server:
+  compression:
+    enabled: true
+    mime-types: application/javascript,text/css,application/json,application/xml,text/html,text/xml,text/plain

@@ -31,16 +31,26 @@ export const updateRole = (params) => {
 export const deleteRole = (id) => {
   return axios.request({
     url: '/sys/role/delete',
-    params: {
+    data: {
       id
     },
-    method: 'get'
+    method: 'post'
   })
 }
 
 export const editRolePermssion = (params) => {
   return axios.request({
     url: '/sys/role/perm/update',
+    data: {
+      ...params
+    },
+    method: 'post'
+  })
+}
+
+export const editRoleDept = (params) => {
+  return axios.request({
+    url: '/sys/role/dept/update',
     data: {
       ...params
     },

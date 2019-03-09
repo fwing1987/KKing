@@ -1,11 +1,11 @@
 package com.kking.admin.shiro;
 
-import com.kking.dao.entity.TSysAction;
 import com.kking.dao.entity.TSysPerm;
 import com.kking.dao.entity.TSysRole;
 import com.kking.dao.entity.TSysUser;
 import com.kking.dao.service.TSysRoleService;
 import com.kking.dao.service.TSysUserService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -14,7 +14,6 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 public class MyShiroRealm extends AuthorizingRealm {
@@ -37,8 +36,8 @@ public class MyShiroRealm extends AuthorizingRealm {
         for(TSysRole role : roleList){
             authorizationInfo.addRole(role.getRoleName());
             for(TSysPerm perm : role.getPermList()){
-                for(TSysAction action: perm.getActionList()){
-                    authorizationInfo.addStringPermission(perm.getPermName()+":"+action.getActionName());
+                if(StringUtils.isNotEmpty(perm.getPermName())) {
+                    authorizationInfo.addStringPermission(perm.getPermName());
                 }
             }
         }

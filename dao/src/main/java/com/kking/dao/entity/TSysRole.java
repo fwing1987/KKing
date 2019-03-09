@@ -5,12 +5,16 @@ import java.util.Date;
 import java.util.List;
 
 public class TSysRole extends BaseEntity{
+    public interface PERM_TYPE{
+        String ALL = "A";//所有权限
+        String PART = "P";//部分权限
+    }
     private Integer id;
     private String roleName;
     private String roleDesc;
     private Date createTime;
     private Integer state;
-
+    private String deptPermType;
     private List<TSysPerm> permList;
 
     private static final long serialVersionUID = 1L;
@@ -63,6 +67,15 @@ public class TSysRole extends BaseEntity{
         this.state = state;
     }
 
+    public String getDeptPermType() {
+        return deptPermType;
+    }
+
+    public void setDeptPermType(String deptPermType) {
+        this.deptPermType = deptPermType;
+    }
+
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -74,6 +87,7 @@ public class TSysRole extends BaseEntity{
         sb.append(", roleDesc=").append(roleDesc);
         sb.append(", createTime=").append(createTime);
         sb.append(", state=").append(state);
+        sb.append(", deptPermType=").append(deptPermType);
         sb.append("]");
         return sb.toString();
     }

@@ -13,6 +13,7 @@ public class TSysDept extends BaseEntity{
     private String mail;
     private Date createTime;
     private Date updateTime;
+    private Integer roleId;
     private Integer permId;
 
     private static final long serialVersionUID = 1L;
@@ -97,6 +98,14 @@ public class TSysDept extends BaseEntity{
         this.updateTime = updateTime;
     }
 
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
     public Integer getPermId() {
         return permId;
     }
@@ -104,7 +113,6 @@ public class TSysDept extends BaseEntity{
     public void setPermId(Integer permId) {
         this.permId = permId;
     }
-
 
     @Override
     public String toString() {
@@ -122,7 +130,6 @@ public class TSysDept extends BaseEntity{
         sb.append(", mail=").append(mail);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
-        sb.append(", permId=").append(permId);
         sb.append("]");
         return sb.toString();
     }

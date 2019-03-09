@@ -1,6 +1,8 @@
 package com.kking.dao.service.impl;
 
+import com.kking.dao.entity.TSysRole;
 import com.kking.dao.entity.TSysUser;
+import com.kking.dao.mapper.TSysRoleMapper;
 import com.kking.dao.mapper.TSysUserMapper;
 import com.kking.dao.service.TSysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import java.util.List;
 public class TSysUserServiceImpl implements TSysUserService {
     @Autowired
     TSysUserMapper tSysUserMapper;
+
     @Override
     public TSysUser selectById(Integer id) {
         return tSysUserMapper.selectById(id);
@@ -37,8 +40,8 @@ public class TSysUserServiceImpl implements TSysUserService {
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysUserMapper.deleteById(id);
+    public int deleteById(TSysUser tSysUser) {
+        return tSysUserMapper.deleteById(tSysUser);
     }
 
     @Override
@@ -46,4 +49,16 @@ public class TSysUserServiceImpl implements TSysUserService {
         return tSysUserMapper.update(tSysUser);
     }
 
+    @Override
+    public boolean isUserHasPermForRole(TSysUser user, Integer roleId) {
+        if(user.isAdmin()){
+            return true;
+        }
+        for (TSysRole role : user.getRoleList()) {
+            if (TSysRole.PERM_TYPE.ALL.equals(role.getDeptPermType())) {
+                return true;
+            }
+        }
+        return tSysUserMapper.checkUserRoleEditPermission(user.getId(), roleId) > 0;
+    }
 }

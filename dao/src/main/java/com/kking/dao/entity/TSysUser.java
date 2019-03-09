@@ -128,6 +128,10 @@ public class TSysUser extends BaseEntity{
         return sb.toString();
     }
 
+    public boolean isAdmin() {
+        return id != null && id == 1;
+    }
+
     public interface STATE {
         int NORMAL = 0;
         int INVALID = 1;

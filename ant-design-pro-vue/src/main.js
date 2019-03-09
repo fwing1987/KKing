@@ -8,9 +8,6 @@ import './core/use'
 import bootstrap from './core/bootstrap'
 import '@/permission' // permission control
 import '@/utils/filter' // global filter
-import _ from 'lodash'
-
-Vue.prototype._ = _
 
 Vue.config.productionTip = false
 

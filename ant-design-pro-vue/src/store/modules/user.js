@@ -56,12 +56,6 @@ const user = {
           if (result.roles && result.roles.length > 0) {
             result.roles.map(roleItem => {
               if (roleItem.permList && roleItem.permList.length > 0) {
-                roleItem.permList.map(permItem => {
-                  if (permItem.actionList != null && permItem.actionList.length > 0) {
-                    const action = permItem.actionList.map(action => { return action.actionName })
-                    permItem.actionList = action
-                  }
-                })
                 roleItem.permissionList = roleItem.permList.map(permission => { return permission.permName })
               }
             })

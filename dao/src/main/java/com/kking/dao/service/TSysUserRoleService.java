@@ -9,6 +9,6 @@ public interface TSysUserRoleService {
     public TSysUserRole selectOneByProperty(String key, Object value);
     public List<TSysUserRole> selectListByProperty(String key, Object value);
     public int insert(TSysUserRole tSysUserRole);
-    public int deleteById(Integer id);
+    public int deleteById(TSysUserRole tSysUserRole);
     public int update(TSysUserRole tSysUserRole);
 }

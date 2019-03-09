@@ -37,8 +37,8 @@ public class TSysRolePermServiceImpl implements TSysRolePermService {
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysRolePermMapper.deleteById(id);
+    public int deleteById(TSysRolePerm tSysRolePerm) {
+        return tSysRolePermMapper.deleteById(tSysRolePerm);
     }
 
     @Override

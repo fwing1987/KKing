@@ -9,6 +9,8 @@
     </parent>
     <artifactId>admin</artifactId>
     <description>Demo project for Spring Boot</description>
+    <packaging>jar</packaging>
+    <name>admin</name>
 
     <properties>
         <java.version>1.8</java.version>
@@ -106,6 +108,11 @@
                     <!--</execution>-->
                 <!--</executions>-->
             <!--</plugin>-->
+            <plugin>
+                <!--该插件主要用途：构建可执行的JAR -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 

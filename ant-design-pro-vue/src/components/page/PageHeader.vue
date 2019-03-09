@@ -3,7 +3,7 @@
     <div class="page-header-index-wide">
       <a-breadcrumb class="breadcrumb">
         <a-breadcrumb-item v-for="(item, index) in breadList" :key="index">
-          <router-link v-if="item.name != name" :to="{ path: item.path }">
+          <router-link v-if="item.name != name && item.redirect" :to="{ path: item.path ? item.path : '/' }">
             {{ item.meta.title }}
           </router-link>
           <span v-else>{{ item.meta.title }}</span>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-card style="margin-bottom:10px">
+    <a-card style="margin-bottom:10px" v-perm:role:list>
       <a-form layout="inline">
         <a-row :gutter="16" type="flex" justify="start">
           <a-col :span="6">
@@ -36,12 +36,12 @@
             type="primary"
             :disabled="tableSelected.type && tableSelected.type === 'B'"
             @click="addRoleClick"
-            v-action:add
+            v-perm:role:add
           >
             <a-icon type="plus" />新增
           </a-button>
-          <a-button type="primary" @click="editRoleClick" v-action:edit> <a-icon type="edit" />修改 </a-button>
-          <a-button type="danger" @click="deleteRoleClick" v-action:remove> <a-icon type="delete" />删除 </a-button>
+          <a-button type="primary" @click="editRoleClick" v-perm:role:edit> <a-icon type="edit" />修改 </a-button>
+          <a-button type="danger" @click="deleteRoleClick" v-perm:role:remove> <a-icon type="delete" />删除 </a-button>
         </a-button-group>
         <a-table
           style="margin-top:10px"
@@ -55,31 +55,35 @@
       </a-spin>
     </a-card>
 
-    <a-modal v-model="showMenuModal" destroyOnClose @ok="editPermssion" :confirmLoading="menuTree.menuModalLoading">
-      <a-row>
-        <a-col :span="12">
-          <a-card title="所有菜单">
-            <a-tree
-              :treeData="menuTree.menuData"
-              showIcon
-              defaultExpandAll
-              checkable
-              showLine
-              @check="checkTreeMenu"
-              :defaultCheckedKeys="menuTree.selectedTreeKeys"
-            />
-          </a-card>
-        </a-col>
-        <a-col :span="12">
-          <a-card title="已分配菜单">
-            <a-tree
-              :treeData="menuTree.selectedMenuData"
-              showIcon
-              defaultExpandAll
-            />
-          </a-card>
-        </a-col>
-      </a-row>
+    <a-modal v-model="showMenuModal" destroyOnClose @ok="editPermssion" :confirmLoading="modalTree.menuModalLoading">
+      <a-spin tips="加载中，请稍候..." :spinning="modalTree.loading">
+        <a-row>
+          <a-col :span="12">
+            <a-card title="所有资源">
+              <a-tree
+                :treeData="modalTree.treeData"
+                showIcon
+                checkable
+                showLine
+                @check="checkTreeMenu"
+                @expand="expandTreeMenu"
+                :checkStrictly="modalTree.checkStrictly"
+                :defaultCheckedKeys="modalTree.selectedTreeKeys"
+                :defaultExpandedKeys="modalTree.defaultExpandedKeys"
+              />
+            </a-card>
+          </a-col>
+          <a-col :span="12">
+            <a-card title="已分配资源">
+              <a-tree
+                :treeData="modalTree.selectedMenuData"
+                showIcon
+                :expandedKeys="modalTree.defaultExpandedKeys"
+              />
+            </a-card>
+          </a-col>
+        </a-row>
+      </a-spin>
     </a-modal>
 
     <a-modal v-model="showRoleModal" title="角色修改" :maskClosable="false" @ok="editRole">
@@ -110,8 +114,9 @@
   </div>
 </template>
 <script>
-import { getRoleList, addRole, updateRole, deleteRole, editRolePermssion } from '@/api/role'
-import { getMenuList } from '@/api/menu'
+import { getRoleList, addRole, updateRole, deleteRole, editRolePermssion, editRoleDept } from '@/api/role'
+import { getMenuWithRoleStatus } from '@/api/menu'
+import { getDeptWithRoleStatus } from '@/api/dept'
 
 export default {
   methods: {
@@ -135,12 +140,12 @@ export default {
           }
           ret.push(newData)
         }
-        if (data[i].actionName && e) {
+        if (e) {
           // 将有变化的节点变色突出展示
           if (selectedKeys.indexOf(data[i].id) >= 0 && !data[i].roleId ||
-               selectedKeys.indexOf(data[i].id) < 0 && data[i].roleId) {
+                selectedKeys.indexOf(data[i].id) < 0 && data[i].roleId) {
             data[i].class = 'tree-selected-node'
-            this.menuTree.changeMenuData.push({ permId: data[i].permId, new: !data[i].roleId })
+            this.modalTree.changeMenuData.push({ permId: data[i].permId, new: !data[i].roleId })
           } else {
             data[i].class = ''
           }
@@ -148,14 +153,59 @@ export default {
       }
       return ret
     },
+    makeSelectedDeptData (data, checkedKeys, disableCheck) {
+      // 部门因为权限继承，有父部门的权限就有子部门的权限
+      // 所以在父节点选择的情况下，下级部门是否选择就没有什么关系，直接禁用
+      for (let i = 0; i < data.length; i++) {
+        data[i].disableCheckbox = disableCheck
+        data[i].disabled = disableCheck
+        if (!disableCheck && (checkedKeys.indexOf(data[i].id) >= 0 && !data[i].roleId ||
+          checkedKeys.indexOf(data[i].id) < 0 && data[i].roleId)) {
+          data[i].class = 'tree-selected-node'
+        } else {
+          data[i].class = ''
+        }
+      }
+      var ret = null
+      for (let i = 0; i < data.length; i++) {
+        var childRet = null
+        if (data[i].children) {
+          childRet = this.makeSelectedDeptData(data[i].children, checkedKeys, disableCheck || checkedKeys.indexOf(data[i].id) >= 0)
+        }
+        if (!disableCheck) {
+          if (!ret) ret = []
+          var item = { id: data[i].id, check: checkedKeys.indexOf(data[i].id) >= 0 }
+          if (childRet) {
+            item['children'] = childRet
+          }
+          ret.push(item)
+
+          if (checkedKeys.indexOf(data[i].id) >= 0) {
+            this.modalTree.selectedMenuData.push(data[i])
+          }
+        }
+      }
+      return ret
+    },
     checkTreeMenu (checkedKeys, e) {
       // 菜单树选择change
-      this.menuTree.changeMenuData = []
-      if (e && e.halfCheckedKeys) {
-        this.menuTree.selectedMenuData = this.makeSelectedMenuData(this.menuTree.menuData, checkedKeys.concat(e.halfCheckedKeys), e)
-      } else {
-        this.menuTree.selectedMenuData = this.makeSelectedMenuData(this.menuTree.menuData, checkedKeys, e)
+      if (checkedKeys.checked) {
+        checkedKeys = checkedKeys.checked
       }
+      this.modalTree.changeMenuData = []
+      this.modalTree.selectedMenuData = []
+      if (this.permEditType === 'dept') {
+        this.modalTree.changeMenuData = this.makeSelectedDeptData(this.modalTree.treeData, checkedKeys, false)
+      } else if (this.permEditType === 'menu') {
+        if (e && e.halfCheckedKeys) {
+          this.modalTree.selectedMenuData = this.makeSelectedMenuData(this.modalTree.treeData, checkedKeys.concat(e.halfCheckedKeys), e)
+        } else {
+          this.modalTree.selectedMenuData = this.makeSelectedMenuData(this.modalTree.treeData, checkedKeys, e)
+        }
+      }
+    },
+    expandTreeMenu (expandedKeys, e) {
+      this.modalTree.defaultExpandedKeys = expandedKeys
     },
     customRow (record) {
       // table点击事件
@@ -187,7 +237,7 @@ export default {
       }
       this.editType = 'update'
       this.initRoleParams()
-      _.merge(this.modalParams, this.tableSelected)
+      Object.assign(this.modalParams, this.tableSelected)
       this.modalParams.state = !this.modalParams.state
       this.showRoleModal = true
     },
@@ -243,17 +293,24 @@ export default {
       if (!this.tableSelected.id) {
         this.$error({ title: `请选择要修改的角色` })
         return
-      } else if (this.menuTree.changeMenuData.length === 0) {
+      } else if (this.modalTree.changeMenuData.length === 0) {
         this.showMenuModal = false
         return
       }
-      this.menuTree.menuModalLoading = true
+      this.modalTree.menuModalLoading = true
       var params = {
-        'permList': this.menuTree.changeMenuData,
+        'changeList': this.modalTree.changeMenuData,
         id: this.tableSelected.id
       }
-      editRolePermssion(params).then(res => {
-        this.menuTree.menuModalLoading = false
+
+      var editFunc
+      if (this.permEditType === 'dept') {
+        editFunc = editRoleDept
+      } else if (this.permEditType === 'menu') {
+        editFunc = editRolePermssion
+      }
+      editFunc(params).then(res => {
+        this.modalTree.menuModalLoading = false
         if (!res.code) {
           this.showMenuModal = false
           this.$message.success('修改权限成功', 5)
@@ -277,6 +334,9 @@ export default {
       for (var i = 0; i < data.length; i++) {
         data[i].title = data[i].name
         data[i].key = data[i].id
+        data[i].disableCheckbox = false
+        data[i].disabled = false
+        data[i].class = ''
         if (data[i].icon) {
           data[i].icon = (<a-icon type={data[i].icon} />)
         }
@@ -308,9 +368,11 @@ export default {
       for (var i = 0; i < data.length; i++) {
         if (data[i].children) {
           this.getSelectedTreeKeys(data[i].children)
-        } else {
+        }
+        if (this.permEditType === 'menu' && !data[i].children ||
+          this.permEditType === 'dept') {
           if (data[i].roleId) {
-            this.menuTree.selectedTreeKeys.push(data[i].id)
+            this.modalTree.selectedTreeKeys.push(data[i].id)
           }
         }
       }
@@ -322,15 +384,26 @@ export default {
   watch: {
     showMenuModal (newVal) {
       if (newVal) {
+        var getListFunc
+        if (this.permEditType === 'dept') {
+          getListFunc = getDeptWithRoleStatus
+          this.modalTree.checkStrictly = true
+        } else if (this.permEditType === 'menu') {
+          getListFunc = getMenuWithRoleStatus
+          this.modalTree.checkStrictly = false
+        }
         // 设置成{}才会默认展开，[]默认全部收起，奇怪？？
-        this.menuTree.menuData = {}
-        this.menuTree.selectedTreeKeys = {}
-        getMenuList({ roleId: this.tableSelected.id }).then(res => {
-          this.menuTree.menuData = res.data.menus
-          this.menuTree.selectedTreeKeys = []
-          this.getSelectedTreeKeys(this.menuTree.menuData)
-          this.makeTreeDataSafe(this.menuTree.menuData)
-          this.checkTreeMenu(this.menuTree.selectedTreeKeys)
+        this.modalTree.treeData = {}
+        this.modalTree.selectedTreeKeys = {}
+        this.modalTree.loading = true
+        getListFunc({ roleId: this.tableSelected.id }).then(res => {
+          this.modalTree.loading = false
+          this.makeTreeDataSafe(res.data)
+          this.$set(this.modalTree, 'treeData', res.data)
+          this.modalTree.selectedTreeKeys = []
+          this.getSelectedTreeKeys(this.modalTree.treeData)
+          this.checkTreeMenu(this.modalTree.selectedTreeKeys)
+          this.modalTree.defaultExpandedKeys = this.modalTree.treeData.map(item => item.id)
         })
       }
     },
@@ -345,12 +418,15 @@ export default {
   data () {
     return {
       loading: false,
-      menuTree: {
-        menuData: {},
+      modalTree: {
+        treeData: {},
         selectedMenuData: {},
         selectedTreeKeys: [],
         changeMenuData: [], // 权限选择变化过的节点
-        menuModalLoading: false // 修改权限弹出框，确认按钮loading
+        menuModalLoading: false, // 修改权限弹出框，确认按钮loading
+        defaultExpandedKeys: [],
+        loading: false,
+        checkStrictly: false
       },
       labelCol: {
         xs: { span: 5 }
@@ -382,7 +458,7 @@ export default {
           customRender: (state, row, index) => {
             return (
               <div>
-                {this.$hasAction('edit') ? (
+                {this.$hasPerm('role:edit') ? (
                   <a-switch checked={row.checked} onChange={(checked) => { this.roleStateChange(checked, row) }}/>
                 ) : (
                   <div>{state === 0 ? <a-tag color="cyan">正常</a-tag> : <a-tag color="red">禁用</a-tag>}</div>
@@ -402,7 +478,7 @@ export default {
             return (
               <div>
                 <a-button-group>
-                  {this.$hasAction('edit') ? (
+                  {this.$hasPerm('role:edit') ? (
                     <a-button
                       type="primary"
                       size="small"
@@ -417,22 +493,39 @@ export default {
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('edit') ? (
+                  {this.$hasPerm('role:edit') ? (
                     <a-button
                       type="primary"
                       size="small"
                       icon="solution"
                       onClick={() => {
                         this.tableSelected = row
+                        this.permEditType = 'menu'
                         this.showMenuModal = true
                       }}
                     >
-                    权限分配
+                    菜单
                     </a-button>
                   ) : (
                     ''
                   )}
-                  {this.$hasAction('remove') ? (
+                  {this.$hasPerm('role:edit') ? (
+                    <a-button
+                      type="primary"
+                      size="small"
+                      icon="solution"
+                      onClick={() => {
+                        this.tableSelected = row
+                        this.permEditType = 'dept'
+                        this.showMenuModal = true
+                      }}
+                    >
+                    部门
+                    </a-button>
+                  ) : (
+                    ''
+                  )}
+                  {this.$hasPerm('role:remove') ? (
                     <a-button
                       type="danger"
                       size="small"
@@ -454,17 +547,15 @@ export default {
         }
       ],
       data: [],
-      params: {
-        name: '',
-        type: ''
-      },
+      params: {},
       modalParams: {
         type: 'M'
       },
       showMenuModal: false,
       showRoleModal: false,
       tableSelected: {},
-      editType: ''
+      editType: '',
+      permEditType: ''
     }
   }
 }
@@ -479,10 +570,7 @@ export default {
 .ant-table-tbody > tr > td {
   padding: 10px 10px;
 }
-.tree-selected-node .ant-tree-title{
-  color: red
-}
-.tree-selected-node i{
+.tree-selected-node>.ant-tree-node-content-wrapper>.ant-tree-title{
   color: red
 }
 </style>

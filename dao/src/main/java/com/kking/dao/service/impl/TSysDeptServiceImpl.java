@@ -2,6 +2,7 @@ package com.kking.dao.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kking.common.annotation.DataScope;
 import com.kking.common.utils.TreeUtil;
 import com.kking.dao.entity.TSysDept;
 import com.kking.dao.mapper.TSysDeptMapper;
@@ -18,12 +19,16 @@ import java.util.Map;
 public class TSysDeptServiceImpl implements TSysDeptService {
     @Autowired
     TSysDeptMapper tSysDeptMapper;
+    @Autowired
+    TSysDeptService tSysDeptService;
     @Override
-    public TSysDept selectById(Integer id) {
-        return tSysDeptMapper.selectById(id);
+    @DataScope
+    public TSysDept selectById(TSysDept tSysDept) {
+        return tSysDeptMapper.selectById(tSysDept);
     }
 
     @Override
+    @DataScope
     public List<TSysDept> selectList(TSysDept tSysDept) {
         return tSysDeptMapper.selectList(tSysDept);
     }
@@ -40,21 +45,29 @@ public class TSysDeptServiceImpl implements TSysDeptService {
 
     @Override
     public int insert(TSysDept tSysDept) {
+        TSysDept deptCond = new TSysDept();
+        deptCond.setId(tSysDept.getPid());
+        TSysDept parentDept = tSysDeptService.selectById(deptCond);
+        tSysDept.setPids(tSysDept.getPid() + "," + parentDept.getPids());
         return tSysDeptMapper.insert(tSysDept);
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysDeptMapper.deleteById(id);
+    @DataScope
+    public int deleteById(TSysDept tSysDept) {
+        return tSysDeptMapper.deleteById(tSysDept);
     }
 
     @Override
+    @DataScope
     public int update(TSysDept tSysDept) {
         return tSysDeptMapper.update(tSysDept);
     }
 
     @Override
-    public List<JSONObject> selectListWithUser(TSysDept dept) {
-        return TreeUtil.toTreeList(tSysDeptMapper.selectListWithUser(dept));
+    @DataScope(tableAlias = "d")
+    public List<TSysDept> getDeptWithRoleStatus(TSysDept dept) {
+        return tSysDeptMapper.getDeptWithRoleStatus(dept);
     }
+
 }

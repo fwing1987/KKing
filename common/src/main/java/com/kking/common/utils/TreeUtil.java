@@ -41,4 +41,16 @@ public class TreeUtil {
 
         return tmpList;
     }
+
+    public static void setChildrenRoleWithParent(List<JSONObject> dataList, Integer parentRole){
+        for(JSONObject item : dataList){
+            if(parentRole != null) {
+                item.put("roleId", parentRole);
+            }
+            if(item.containsKey("children")){
+                setChildrenRoleWithParent((List<JSONObject>)item.get("children"),
+                        parentRole!=null?parentRole:item.getInteger("roleId"));
+            }
+        }
+    }
 }

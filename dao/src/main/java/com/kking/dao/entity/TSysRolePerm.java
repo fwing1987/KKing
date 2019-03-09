@@ -8,6 +8,7 @@ public class TSysRolePerm extends BaseEntity{
     private Integer roleId;
     private Integer permId;
     private Date createTime;
+    private Integer resourceId;
 
     private static final long serialVersionUID = 1L;
 
@@ -43,6 +44,13 @@ public class TSysRolePerm extends BaseEntity{
         this.createTime = createTime;
     }
 
+    public Integer getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Integer resourceId) {
+        this.resourceId = resourceId;
+    }
 
     @Override
     public String toString() {

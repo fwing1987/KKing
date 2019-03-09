@@ -7,15 +7,9 @@
 </template>
 
 <script>
-import AList from 'ant-design-vue/es/list'
-import AListItem from 'ant-design-vue/es/list/Item'
 
 export default {
-  name: 'Article',
-  components: {
-    AList,
-    AListItem
-  }
+  name: 'Article'
 }
 </script>
 

@@ -37,8 +37,8 @@ public class TSysUserRoleServiceImpl implements TSysUserRoleService {
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysUserRoleMapper.deleteById(id);
+    public int deleteById(TSysUserRole tSysUserRole) {
+        return tSysUserRoleMapper.deleteById(tSysUserRole);
     }
 
     @Override

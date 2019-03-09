@@ -9,6 +9,8 @@ public interface TSysUserService {
     public TSysUser selectOneByProperty(String key, Object value);
     public List<TSysUser> selectListByProperty(String key, Object value);
     public int insert(TSysUser tSysUser);
-    public int deleteById(Integer id);
+    public int deleteById(TSysUser tSysUser);
     public int update(TSysUser tSysUser);
+
+    boolean isUserHasPermForRole(TSysUser user, Integer roleId);
 }

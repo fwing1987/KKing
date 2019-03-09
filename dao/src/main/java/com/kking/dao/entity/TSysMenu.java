@@ -11,12 +11,10 @@ public class TSysMenu extends BaseEntity{
     private Integer id;
     private String name;
     private Integer pid;
-    private Integer permId;
     private String type;
     private String path;
     private String component;
     private String icon;
-    private String actionName;
     private Integer state;
     private Date createTime;
     private Date updateTime;
@@ -24,6 +22,7 @@ public class TSysMenu extends BaseEntity{
     private Integer userId;
     private String permName;
     private Integer roleId;
+    private Integer permId;
 
     private static final long serialVersionUID = 1L;
 
@@ -49,14 +48,6 @@ public class TSysMenu extends BaseEntity{
 
     public void setPid(Integer pid) {
         this.pid = pid;
-    }
-
-    public Integer getPermId() {
-        return permId;
-    }
-
-    public void setPermId(Integer permId) {
-        this.permId = permId;
     }
 
     public String getType() {
@@ -123,14 +114,6 @@ public class TSysMenu extends BaseEntity{
         this.sort = sort;
     }
 
-    public String getActionName() {
-        return actionName;
-    }
-
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
-
     public Integer getUserId() {
         return userId;
     }
@@ -155,6 +138,14 @@ public class TSysMenu extends BaseEntity{
         this.roleId = roleId;
     }
 
+    public Integer getPermId() {
+        return permId;
+    }
+
+    public void setPermId(Integer permId) {
+        this.permId = permId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -164,12 +155,10 @@ public class TSysMenu extends BaseEntity{
         sb.append(", id=").append(id);
         sb.append(", name=").append(name);
         sb.append(", pid=").append(pid);
-        sb.append(", permId=").append(permId);
         sb.append(", type=").append(type);
         sb.append(", path=").append(path);
         sb.append(", component=").append(component);
         sb.append(", icon=").append(icon);
-        sb.append(", actionName=").append(actionName);
         sb.append(", state=").append(state);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);

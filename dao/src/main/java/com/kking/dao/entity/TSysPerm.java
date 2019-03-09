@@ -5,15 +5,14 @@ import java.util.List;
 
 public class TSysPerm extends BaseEntity{
     public interface PERM_TYPE{
-        final String MENU = "MENU";
+        String MENU = "MENU";
+        String DEPT = "DEPT";
     }
     private Integer id;
     private Date createTime;
     private Integer resourceId;
     private String permName;
-    private Integer actionId;
     private String permType;
-    private List<TSysAction> actionList;
 
     private static final long serialVersionUID = 1L;
 
@@ -49,14 +48,6 @@ public class TSysPerm extends BaseEntity{
         this.permName = permName;
     }
 
-    public Integer getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(Integer actionId) {
-        this.actionId = actionId;
-    }
-
     public String getPermType() {
         return permType;
     }
@@ -65,13 +56,6 @@ public class TSysPerm extends BaseEntity{
         this.permType = permType;
     }
 
-    public List<TSysAction> getActionList() {
-        return actionList;
-    }
-
-    public void setActionList(List<TSysAction> actionList) {
-        this.actionList = actionList;
-    }
 
     @Override
     public String toString() {
@@ -83,7 +67,6 @@ public class TSysPerm extends BaseEntity{
         sb.append(", createTime=").append(createTime);
         sb.append(", resourceId=").append(resourceId);
         sb.append(", permName=").append(permName);
-        sb.append(", actionId=").append(actionId);
         sb.append(", permType=").append(permType);
         sb.append("]");
         return sb.toString();

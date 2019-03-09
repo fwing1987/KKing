@@ -37,8 +37,8 @@ public class TSysPermServiceImpl implements TSysPermService {
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysPermMapper.deleteById(id);
+    public int deleteById(TSysPerm tSysPerm) {
+        return tSysPermMapper.deleteById(tSysPerm);
     }
 
     @Override

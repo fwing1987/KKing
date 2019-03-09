@@ -37,8 +37,8 @@ public class ${table.xCamelName}ServiceImpl implements ${table.xCamelName}Servic
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return ${table.camelName}Mapper.deleteById(id);
+    public int deleteById(${table.xCamelName} ${table.camelName}) {
+        return ${table.camelName}Mapper.deleteById(${table.camelName});
     }
 
     @Override

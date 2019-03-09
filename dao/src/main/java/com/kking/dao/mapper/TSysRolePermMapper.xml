@@ -44,13 +44,13 @@
     </insert>
     <select id="selectOneByProperty" resultType="TSysRolePerm">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
     <select id="selectListByProperty" resultType="TSysRolePerm">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
-    <delete id="deleteById" parameterType="Integer">
+    <delete id="deleteById" parameterType="TSysRolePerm">
         delete from t_sys_role_perm where id=#{id}
     </delete>
     <update id="update" parameterType="TSysRolePerm">
@@ -71,5 +71,11 @@
             <if test="createTime != null "> and `create_time`=#{createTime}</if>
         </where>
     </delete>
+    <select id="selectRolePermWithResourceAndRole" parameterType="TSysRolePerm" resultType="TSysRolePerm">
+        select rp.id,  rp.role_id,  p.id perm_id,  rp.create_time
+        from t_sys_perm p left join t_sys_role_perm rp on rp.perm_id=p.id and rp.role_id=#{roleId}
+        where p.resource_id=#{resourceId}
+        and p.perm_type=#{params.permType}
+    </select>
 
 </mapper>

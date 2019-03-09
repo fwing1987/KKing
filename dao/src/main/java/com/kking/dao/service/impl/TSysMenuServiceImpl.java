@@ -1,12 +1,10 @@
 package com.kking.dao.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kking.common.annotation.DataScope;
 import com.kking.common.utils.TreeUtil;
-import com.kking.dao.entity.TSysAction;
 import com.kking.dao.entity.TSysMenu;
 import com.kking.dao.entity.TSysPerm;
-import com.kking.dao.mapper.TSysActionMapper;
 import com.kking.dao.mapper.TSysMenuMapper;
 import com.kking.dao.mapper.TSysPermMapper;
 import com.kking.dao.service.TSysMenuService;
@@ -15,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TSysMenuServiceImpl implements TSysMenuService {
@@ -26,12 +21,10 @@ public class TSysMenuServiceImpl implements TSysMenuService {
     TSysMenuMapper tSysMenuMapper;
     @Autowired
     TSysPermMapper tSysPermMapper;
-    @Autowired
-    TSysActionMapper tSysActionMapper;
 
     @Override
-    public TSysMenu selectById(Integer id) {
-        return tSysMenuMapper.selectById(id);
+    public TSysMenu selectById(TSysMenu tSysMenu) {
+        return tSysMenuMapper.selectById(tSysMenu);
     }
 
     @Override
@@ -52,124 +45,57 @@ public class TSysMenuServiceImpl implements TSysMenuService {
     @Override
     @Transactional
     public int insert(TSysMenu tSysMenu) {
-        if(StringUtils.isEmpty(tSysMenu.getPermName()) &&
-                StringUtils.isNotEmpty(tSysMenu.getActionName())){
-            throw new RuntimeException("添加操作名必须同时添加资源名");
-        }
         tSysMenuMapper.insert(tSysMenu);
-        if(StringUtils.isNotEmpty(tSysMenu.getActionName())){
+        //添加权限
+        TSysPerm perm = new TSysPerm();
+        perm.setPermName(tSysMenu.getPermName());
+        perm.setResourceId(tSysMenu.getId());
+        perm.setPermType(TSysPerm.PERM_TYPE.MENU);
+        return tSysPermMapper.insert(perm);
+    }
+
+    @Override
+    @DataScope(type = "menu")
+    public int deleteById(TSysMenu tSysMenu) {
+        return tSysMenuMapper.deleteById(tSysMenu);
+    }
+
+    @Override
+    @DataScope(type = "menu")
+    public int update(TSysMenu tSysMenu) {
+        TSysMenu tmpMenu = tSysMenuMapper.selectById(tSysMenu);
+        if(tmpMenu == null){
+            throw new RuntimeException("菜单不存在~");
+        }
+        //添加权限
+        TSysPerm perm = tSysPermMapper.selectOneByProperty("resource_id",tSysMenu.getId());
+        if(perm == null){
             //添加权限
-            TSysAction action = tSysActionMapper.selectOneByProperty("action_name",tSysMenu.getActionName());
-            TSysPerm perm;
-            if(action == null){
-                //没有action，先添加，再加权限
-                action = new TSysAction();
-                action.setActionName(tSysMenu.getActionName());
-                tSysActionMapper.insert(action);
-            }
             perm = new TSysPerm();
-            perm.setActionId(action.getId());
             perm.setPermName(tSysMenu.getPermName());
-            if(tSysMenu.getType().equals(TSysMenu.TYPE.BUTTON)) {
-                //按钮资源ID为父菜单ID
-                perm.setResourceId(tSysMenu.getPid());
-            }else if(tSysMenu.getType().equals(TSysMenu.TYPE.MENU)){
-                //菜单资源ID
-                perm.setResourceId(tSysMenu.getId());
-            }
+            perm.setResourceId(tSysMenu.getId());
             perm.setPermType(TSysPerm.PERM_TYPE.MENU);
             tSysPermMapper.insert(perm);
-
-            tSysMenu.setPermId(perm.getId());
-            tSysMenuMapper.update(tSysMenu);
+        }else if(!tSysMenu.getPermName().equals(perm.getPermName())){
+            //修改权限标识
+            perm.setPermName(tSysMenu.getPermName());
+            tSysPermMapper.update(perm);
         }
-        return 1;
+
+        return tSysMenuMapper.update(tSysMenu);
     }
 
     @Override
-    public int deleteById(Integer id) {
-        return tSysMenuMapper.deleteById(id);
-    }
-
-    @Override
-    public int update(TSysMenu tSysMenu) {
-        if(StringUtils.isEmpty(tSysMenu.getPermName()) &&
-                StringUtils.isNotEmpty(tSysMenu.getActionName())){
-            throw new RuntimeException("添加操作名必须同时添加资源名");
-        }
-        if(StringUtils.isNotEmpty(tSysMenu.getActionName())){
-            //添加权限
-            TSysAction action = tSysActionMapper.selectOneByProperty("action_name",tSysMenu.getActionName());
-            TSysPerm perm;
-            if(action == null){
-                //没有action，先添加，再加权限
-                action = new TSysAction();
-                action.setActionName(tSysMenu.getActionName());
-                tSysActionMapper.insert(action);
-
-                perm = new TSysPerm();
-                perm.setActionId(action.getId());
-                perm.setPermName(tSysMenu.getPermName());
-                if(tSysMenu.getType().equals(TSysMenu.TYPE.BUTTON)) {
-                    //按钮资源ID为父菜单ID
-                    perm.setResourceId(tSysMenu.getPid());
-                }else if(tSysMenu.getType().equals(TSysMenu.TYPE.MENU)){
-                    //菜单资源ID
-                    perm.setResourceId(tSysMenu.getId());
-                }
-                perm.setPermType(TSysPerm.PERM_TYPE.MENU);
-                tSysPermMapper.insert(perm);
-                tSysMenu.setPermId(perm.getId());
-            }else{
-                TSysPerm permCond = new TSysPerm();
-                if(tSysMenu.getType().equals(TSysMenu.TYPE.BUTTON)) {
-                    //按钮资源ID为父菜单ID
-                    permCond.setResourceId(tSysMenu.getPid());
-                }else if(tSysMenu.getType().equals(TSysMenu.TYPE.MENU)){
-                    //菜单资源ID
-                    permCond.setResourceId(tSysMenu.getId());
-                }
-                permCond.setActionId(action.getId());
-                List<TSysPerm> permList = tSysPermMapper.selectList(permCond);
-
-                if(permList.size() == 0) {
-                    //无权限记录，新增
-                    perm = new TSysPerm();
-                    perm.setActionId(action.getId());
-                    perm.setPermName(tSysMenu.getPermName());
-                    if(tSysMenu.getType().equals(TSysMenu.TYPE.BUTTON)) {
-                        //按钮资源ID为父菜单ID
-                        perm.setResourceId(tSysMenu.getPid());
-                    }else if(tSysMenu.getType().equals(TSysMenu.TYPE.MENU)){
-                        //菜单资源ID
-                        perm.setResourceId(tSysMenu.getId());
-                    }
-                    perm.setPermType(TSysPerm.PERM_TYPE.MENU);
-                    tSysPermMapper.insert(perm);
-                    tSysMenu.setPermId(perm.getId());
-                }else{
-                    //有权限记录
-                    if(!permList.get(0).getId().equals(tSysMenu.getPermId())){
-                        //与菜单原记录不同
-                        tSysMenu.setPermId(permList.get(0).getId());
-                    }
-                }
-            }
-
-        }
-        tSysMenuMapper.update(tSysMenu);
-        return 1;
-    }
-
-    @Override
+    @DataScope(type = "menu")
     public List<JSONObject> getUserMenu(TSysMenu tSysMenu) {
         List<TSysMenu> menuList = tSysMenuMapper.getUserMenu(tSysMenu);
         return TreeUtil.toTreeList(menuList);
     }
 
     @Override
-    public List<JSONObject> getTreeList(TSysMenu tSysMenu) {
-        List<TSysMenu> menuList = tSysMenuMapper.getUserMenu(tSysMenu);
+    @DataScope(type = "menu")
+    public List<JSONObject> getUserMenuWithRoleStatus(TSysMenu tSysMenu) {
+        List<TSysMenu> menuList = tSysMenuMapper.getUserMenuWithRoleStatus(tSysMenu);
         return TreeUtil.toTreeList(menuList);
     }
 }

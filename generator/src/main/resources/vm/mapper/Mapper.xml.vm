@@ -46,13 +46,13 @@
     </insert>
     <select id="selectOneByProperty" resultType="${table.xCamelName}">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
     <select id="selectListByProperty" resultType="${table.xCamelName}">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
-    <delete id="deleteById" parameterType="Integer">
+    <delete id="deleteById" parameterType="${table.xCamelName}">
         delete from ${tableName} where ${primaryKey.columnName}=#{${primaryKey.camelName}}
     </delete>
     <update id="update" parameterType="${table.xCamelName}">
@@ -64,7 +64,7 @@
 #end
 #end
         </trim>
-        where id=#{id}
+        where ${primaryKey.columnName}=#{${primaryKey.camelName}}
     </update>
 
 </mapper>

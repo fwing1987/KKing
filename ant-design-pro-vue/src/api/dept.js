@@ -31,16 +31,16 @@ export const updateDept = (params) => {
 export const deleteDept = (id) => {
   return axios.request({
     url: '/sys/dept/delete',
-    params: {
+    data: {
       id
     },
-    method: 'get'
+    method: 'post'
   })
 }
 
-export const editDeptPermssion = (params) => {
+export const getDeptWithRoleStatus = (params) => {
   return axios.request({
-    url: '/sys/dept/perm/update',
+    url: '/sys/dept/listRole',
     data: {
       ...params
     },

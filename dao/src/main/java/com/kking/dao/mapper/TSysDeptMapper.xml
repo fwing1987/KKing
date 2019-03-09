@@ -15,31 +15,28 @@
         <result property="mail" column="mail"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
-        <result property="permId" column="perm_id"/>
     </resultMap>
     <sql id="SelectOneSql" >
-        select <trim suffixOverrides=","> id,  name,  pid,  pids,  state,  leader,  phone,  mail,  create_time,  update_time,  perm_id, </trim>
+        select <trim suffixOverrides=","> id,  name,  pid,  pids,  state,  leader,  phone,  mail,  create_time,  update_time, </trim>
         from t_sys_dept
     </sql>
-    <select id="selectById" resultType="TSysDept" parameterType="Integer">
+    <select id="selectById" resultType="TSysDept" parameterType="TSysDept">
         <include refid="SelectOneSql"/>
         where id=#{id}
+        ${params.dataScope}
     </select>
     <select id="selectList" resultType="TSysDept" parameterType="TSysDept">
         <include refid="SelectOneSql"/>
         <where>
-            <if test="id != null "> and `id`=#{id}</if>
-            <if test="name != null  and name != ''"> and `name`=#{name}</if>
-            <if test="pid != null "> and `pid`=#{pid}</if>
-            <if test="pids != null  and pids != ''"> and `pids`=#{pids}</if>
-            <if test="state != null "> and `state`=#{state}</if>
-            <if test="leader != null  and leader != ''"> and `leader`=#{leader}</if>
-            <if test="phone != null  and phone != ''"> and `phone`=#{phone}</if>
-            <if test="mail != null  and mail != ''"> and `mail`=#{mail}</if>
-            <if test="createTime != null "> and `create_time`=#{createTime}</if>
-            <if test="updateTime != null "> and `update_time`=#{updateTime}</if>
-            <if test="permId != null "> and `perm_id`=#{permId}</if>
+            state=0
+            <if test="name != null  and name != ''"> and d.`name` like concat('%',#{name},'%')</if>
+            <if test="state != null "> and d.`state`=#{state}</if>
+            <if test="leader != null  and leader != ''"> and d.`leader` like concat('%',#{leader},'%')</if>
+            <if test="phone != null  and phone != ''"> and d.`phone` like concat('%',#{phone},'%')</if>
+            <if test="mail != null  and mail != ''"> and d.`mail` like concat('%',#{mail},'%')</if>
+            ${params.dataScope}
         </where>
+        order by pid desc,id
     </select>
     <insert id="insert" parameterType="TSysDept" keyProperty="id" useGeneratedKeys="true">
         insert into t_sys_dept(
@@ -53,7 +50,6 @@
             <if test="mail != null  and mail != ''">`mail`,</if>
             <if test="createTime != null ">`create_time`,</if>
             <if test="updateTime != null ">`update_time`,</if>
-            <if test="permId != null ">`perm_id`,</if>
         </trim>
         )values(
         <trim suffixOverrides=",">
@@ -66,20 +62,21 @@
             <if test="mail != null  and mail != ''">#{mail},</if>
             <if test="createTime != null ">#{createTime},</if>
             <if test="updateTime != null ">#{updateTime},</if>
-            <if test="permId != null ">#{permId},</if>
         </trim>
         )
     </insert>
     <select id="selectOneByProperty" resultType="TSysDept">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
     <select id="selectListByProperty" resultType="TSysDept">
         <include refid="SelectOneSql"/>
-        where ${arg0} = #{arg1}
+        where ${param1} = #{param2}
     </select>
-    <delete id="deleteById" parameterType="Integer">
-        delete from t_sys_dept where id=#{id}
+
+    <delete id="deleteById" parameterType="TSysDept">
+        update t_sys_dept set state=1 where id=#{id}
+        ${params.dataScope}
     </delete>
     <update id="update" parameterType="TSysDept">
         update t_sys_dept set
@@ -93,22 +90,19 @@
             <if test="mail != null  and mail != ''">`mail`=#{mail},</if>
             <if test="createTime != null ">`create_time`=#{createTime},</if>
             <if test="updateTime != null ">`update_time`=#{updateTime},</if>
-            <if test="permId != null ">`perm_id`=#{permId},</if>
         </trim>
         where id=#{id}
+        ${params.dataScope}
     </update>
-    <select id="selectListWithUser" resultType="TSysDept">
-        select d.* from t_sys_dept d
-        left join t_sys_perm p on d.perm_id=p.id
-        left join t_sys_role_perm rp on p.id=rp.perm_id
-        left join t_sys_user_role ur on ur.role_id=rp.role_id
-        left join (select a.* from t_sys_role a ,t_sys_user_role b where b.role_id=a.id and b.user_id=#{params.userId}) r on r.dept_perm_type='A'
-        where (ur.user_id=#{params.userId} or r.id is not null)
-        <if test="name != null  and name != ''"> and d.`name` like concat('%',#{name},'%')</if>
-        <if test="state != null "> and d.`state`=#{state}</if>
-        <if test="leader != null  and leader != ''"> and d.`leader` like concat('%',#{leader},'%')</if>
-        <if test="phone != null  and phone != ''"> and d.`phone` like concat('%',#{phone},'%')</if>
-        <if test="mail != null  and mail != ''"> and d.`mail` like concat('%',#{mail},'%')</if>
+    <select id="getDeptWithRoleStatus" resultType="TSysDept">
+        select d.*,rp.role_id,p.id perm_id
+        from t_sys_dept d
+        left join t_sys_perm p on d.id=p.resource_id and p.perm_type='DEPT'
+        left join t_sys_role_perm rp on p.id=rp.perm_id and rp.role_id=#{roleId}
+        <where>
+            d.state=0
+            ${params.dataScope}
+        </where>
         order by d.pid desc,d.id
     </select>
 </mapper>

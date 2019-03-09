@@ -31,9 +31,19 @@ export const updateMenu = (params) => {
 export const deleteMenu = (id) => {
   return axios.request({
     url: '/sys/menu/delete',
-    params: {
+    data: {
       id
     },
-    method: 'get'
+    method: 'post'
+  })
+}
+
+export const getMenuWithRoleStatus = (params) => {
+  return axios.request({
+    url: '/sys/menu/listRole',
+    data: {
+      ...params
+    },
+    method: 'post'
   })
 }

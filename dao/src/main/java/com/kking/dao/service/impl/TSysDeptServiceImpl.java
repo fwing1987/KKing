@@ -45,10 +45,8 @@ public class TSysDeptServiceImpl implements TSysDeptService {
 
     @Override
     public int insert(TSysDept tSysDept) {
-        TSysDept deptCond = new TSysDept();
-        deptCond.setId(tSysDept.getPid());
-        TSysDept parentDept = tSysDeptService.selectById(deptCond);
-        tSysDept.setPids(tSysDept.getPid() + "," + parentDept.getPids());
+        TSysDept parentDept = tSysDeptService.selectOneByProperty("id",tSysDept.getPid());
+        tSysDept.setPids(parentDept.getPids() + "," + tSysDept.getPid());
         return tSysDeptMapper.insert(tSysDept);
     }
 
@@ -61,6 +59,23 @@ public class TSysDeptServiceImpl implements TSysDeptService {
     @Override
     @DataScope
     public int update(TSysDept tSysDept) {
+        TSysDept oldDept = tSysDeptService.selectOneByProperty("id",tSysDept.getId());
+        if(!oldDept.getPid().equals(tSysDept.getPid())){
+            //修改父部门
+            String oldPids = oldDept.getPids();
+            TSysDept parentDept = tSysDeptService.selectOneByProperty("id",tSysDept.getPid());
+            //修改祖先pids
+            tSysDept.setPids(parentDept.getPids() + "," + tSysDept.getPid());
+
+            List<TSysDept> childDeptList = tSysDeptMapper.getChildrenDept(tSysDept);
+            if(childDeptList.size() > 0){
+                //修改所有层级的孩子结点的祖先pids
+                for(TSysDept childDept: childDeptList){
+                    childDept.setPids(childDept.getPids().replace(oldPids, tSysDept.getPids()));
+                }
+                tSysDeptMapper.updateDeptListPids(childDeptList);
+            }
+        }
         return tSysDeptMapper.update(tSysDept);
     }
 

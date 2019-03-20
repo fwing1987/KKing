@@ -105,4 +105,23 @@
         </where>
         order by d.pid desc,d.id
     </select>
+    <select id="getChildrenDept" resultType="TSysDept" parameterType="TSysDept">
+        select * from t_sys_dept
+        <where>
+            find_in_set(#{id},pids)
+            ${params.dataScope}
+        </where>
+    </select>
+    <update id="updateDeptListPids" parameterType="list">
+        update t_sys_dept set pids =
+        <foreach collection="list" item="item"
+                 open="case id" close="end" separator=" ">
+            when #{item.id} then #{item.pids}
+        </foreach>
+        where id in
+        <foreach collection="list" item="item"
+                 open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
 </mapper>

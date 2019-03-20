@@ -13,4 +13,7 @@ public interface TSysDeptMapper {
     public int update(TSysDept tSysDept);
 
     List<TSysDept> getDeptWithRoleStatus(TSysDept dept);
+    List<TSysDept> getChildrenDept(TSysDept dept);
+
+    public int updateDeptListPids(List<TSysDept> childDeptList);
 }

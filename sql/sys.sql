@@ -11,7 +11,7 @@
  Target Server Version : 50710
  File Encoding         : utf-8
 
- Date: 03/09/2019 09:30:19 AM
+ Date: 03/20/2019 16:02:25 PM
 */
 
 SET NAMES utf8;
@@ -39,7 +39,7 @@ CREATE TABLE `t_sys_dept` (
 --  Records of `t_sys_dept`
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_sys_dept` VALUES ('1', '总公司', '0', '0', '0', 'kking', '13888888888', 'KKing@kking.wang', '2019-02-27 16:27:01', '2019-03-04 17:01:11'), ('16', '省公司', '1', '1,0', '0', null, null, null, '2019-03-05 19:30:19', '2019-03-05 19:30:19'), ('17', '杭州市', '16', '16,1,0', '0', null, null, null, '2019-03-05 19:30:29', '2019-03-08 20:23:39'), ('18', '一级渠道', '1', '1,0', '0', null, null, null, '2019-03-05 19:30:40', '2019-03-05 19:30:40'), ('19', '二级渠道', '18', '18,1,0', '0', null, null, null, '2019-03-05 19:30:48', '2019-03-05 19:30:48');
+INSERT INTO `t_sys_dept` VALUES ('1', '总公司', '0', '0', '0', 'kking', '13888888888', 'KKing@kking.wang', '2019-02-27 16:27:01', '2019-03-04 17:01:11'), ('16', '省公司', '1', '0,1', '0', null, null, null, '2019-03-05 19:30:19', '2019-03-20 15:56:41'), ('17', '杭州市', '16', '0,1,16', '0', null, null, null, '2019-03-05 19:30:29', '2019-03-20 15:56:41'), ('18', '一级渠道', '1', '0,1', '0', null, null, null, '2019-03-05 19:30:40', '2019-03-20 15:39:36'), ('19', '二级渠道', '18', '0,1,18', '0', null, null, null, '2019-03-05 19:30:48', '2019-03-20 15:39:39');
 COMMIT;
 
 -- ----------------------------
@@ -50,10 +50,10 @@ CREATE TABLE `t_sys_menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `pid` int(11) DEFAULT '0' COMMENT '父菜单结点\n约定：最大3级',
-  `type` varchar(2) DEFAULT 'M' COMMENT 'M:正常菜单\nU:外链菜单',
-  `path` varchar(128) DEFAULT NULL,
-  `component` varchar(45) DEFAULT NULL,
-  `icon` varchar(20) DEFAULT NULL,
+  `type` varchar(2) DEFAULT 'M' COMMENT 'M:正常菜单\nD:目录 B:按钮',
+  `path` varchar(128) DEFAULT NULL COMMENT '路径，请使用相对根路径',
+  `component` varchar(45) DEFAULT NULL COMMENT 'vue组件地址，默认添加@/views/前缀',
+  `icon` varchar(20) DEFAULT NULL COMMENT 'antd icon名',
   `state` int(2) DEFAULT '0' COMMENT '0:有效\n1:无效',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -75,9 +75,9 @@ DROP TABLE IF EXISTS `t_sys_perm`;
 CREATE TABLE `t_sys_perm` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `create_time` timestamp NULL DEFAULT NULL,
-  `resource_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL COMMENT '资源id，如菜单id、部门id',
   `perm_name` varchar(15) DEFAULT NULL COMMENT '权限标识名',
-  `perm_type` varchar(10) NOT NULL,
+  `perm_type` varchar(10) NOT NULL COMMENT '权限类型，现有DEPT部门、MENU菜单',
   PRIMARY KEY (`id`),
   KEY `resource_id` (`resource_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8;
